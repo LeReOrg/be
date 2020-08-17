@@ -4,7 +4,7 @@ import cors from "cors";
 import models from './models';
 
 const app = express();
-const PORT = 3000;
+const PORT = 5000;
 
 // Middleware
 app.use(cors());
@@ -29,6 +29,6 @@ app.get('/products/:categoryId', (req, res) => {
   res.send(models.products[req.params["categoryId"]]);
 });
 
-app.listen(PORT, () =>
+app.listen(process.env.PORT || 5000, () =>
   console.log(`Express server currently running on port ${PORT}`)
 );
