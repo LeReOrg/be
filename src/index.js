@@ -24,6 +24,34 @@ app.get('/topProducts', (req, res) => {
   res.send(models.products);
 });
 
+// filter products by price: increase
+app.get('/products/filterByPrice/inc', (req, res) => {
+  var sortable = [];
+  for (var product in models.products) {
+    sortable.push([product, models.products[product]])
+  }
+  sortable.sort(function ([k1, v1], [k2, v2]) {
+    if(v1.price < v2.price) { return -1; }
+    if(v1.price > v2.price) { return 1; }
+    return 0;
+  });
+  res.send(sortable);
+});
+
+// filter products by price: decrease
+app.get('/products/filterByPrice/dec', (req, res) => {
+  var sortable = [];
+  for (var product in models.products) {
+    sortable.push([product, models.products[product]])
+  }
+  sortable.sort(function ([k1, v1], [k2, v2]) {
+    if(v1.price > v2.price) { return -1; }
+    if(v1.price < v2.price) { return 1; }
+    return 0;
+  });
+  res.send(sortable);
+});
+
 // getProductByCategory()
 app.get('/products/:categoryId', (req, res) => {
   res.send(models.products[req.params["categoryId"]]);
