@@ -1,40 +1,40 @@
-let categories = {
-  1: {
+let categories = [
+  {
     id: '1',
     name: 'Giày dép'
   },
-  2: {
+  {
     id: '2',
     name: 'Ba lô'
   },
-  3: {
+  {
     id: '3',
     name: 'Lều trại'
   },
-  4: {
+  {
     id: '4',
     name: 'Đồ điện tử'
   },
-  5: {
+  {
     id: '5',
     name: 'Xe máy'
   },
-  6: {
+  {
     id: '6',
     name: 'Dụng cụ nấu ăn'
   },
-  7: {
+  {
     id: '7',
     name: 'Dụng cụ đa năng'
   },
-  8: {
+  {
     id: '8',
     name: 'Các loại khác'
   }
-};
+];
 
-let products = {
-  1: {
+let products = [
+  {
     id: '1',
     category_id: '1',
     name: 'Đôi giày',
@@ -42,7 +42,7 @@ let products = {
     price: 1000000,
     owner_id: '1'
   },
-  2: {
+  {
     id: '2',
     category_id: '2',
     name: 'Ba lô TNF',
@@ -50,7 +50,7 @@ let products = {
     price: 200000,
     owner_id: '2'
   },
-  3: {
+  {
     id: '3',
     category_id: '3',
     name: 'Lều 4 người',
@@ -58,7 +58,7 @@ let products = {
     price: 200000,
     owner_id: '3'
   },
-  4: {
+  {
     id: '4',
     category_id: '4',
     name: 'Thiết bị GPS',
@@ -66,7 +66,7 @@ let products = {
     price: 300000,
     owner_id: '4'
   },
-  5: {
+  {
     id: '5',
     category_id: '5',
     name: 'Xe win',
@@ -74,7 +74,7 @@ let products = {
     price: 100000,
     owner_id: '5'
   }
-};
+];
 
 export default {
   categories,

@@ -26,11 +26,11 @@ app.get('/topProducts', (req, res) => {
 
 // filter products by price: increase
 app.get('/products/filterByPrice/inc', (req, res) => {
-  var sortable = [];
-  for (var product in models.products) {
-    sortable.push([product, models.products[product]])
+  let sortable = [];
+  for (let product in models.products) {
+    sortable.push(models.products[product])
   }
-  sortable.sort(function ([k1, v1], [k2, v2]) {
+  sortable.sort(function (v1, v2) {
     if(v1.price < v2.price) { return -1; }
     if(v1.price > v2.price) { return 1; }
     return 0;
@@ -40,11 +40,11 @@ app.get('/products/filterByPrice/inc', (req, res) => {
 
 // filter products by price: decrease
 app.get('/products/filterByPrice/dec', (req, res) => {
-  var sortable = [];
-  for (var product in models.products) {
-    sortable.push([product, models.products[product]])
+  let sortable = [];
+  for (let product in models.products) {
+    sortable.push(models.products[product])
   }
-  sortable.sort(function ([k1, v1], [k2, v2]) {
+  sortable.sort(function (v1, v2) {
     if(v1.price > v2.price) { return -1; }
     if(v1.price < v2.price) { return 1; }
     return 0;
@@ -54,7 +54,13 @@ app.get('/products/filterByPrice/dec', (req, res) => {
 
 // getProductByCategory()
 app.get('/products/:categoryId', (req, res) => {
-  res.send(models.products[req.params["categoryId"]]);
+  let products = [];
+  for (let product in models.products) {
+    if (models.products[product].category_id === req.params["categoryId"]) {
+      products.push(models.products[product])
+    }
+  }
+  res.send(products);
 });
 
 app.listen(process.env.PORT || 3000, () =>
