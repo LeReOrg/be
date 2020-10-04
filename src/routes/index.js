@@ -1,8 +1,12 @@
-import product from './product';
-import category from './category'; 
+import products from './products';
+import categories from './categories'; 
+import users from './users'; 
+import carts from './carts';
 
 
 export default {
-    product,
-    category
+    products,
+    categories,
+    users,
+    carts
 };

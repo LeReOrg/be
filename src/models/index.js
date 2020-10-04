@@ -76,7 +76,76 @@ let products = [
   }
 ];
 
+
+let carts = [
+  {
+    id: '1', 
+    owner_id: '1',
+    product_details: {
+      product_ids: [1,2,3], 
+      quantities: [3,3,4]
+    },
+    status: 'Unpaid'
+  },
+  {
+    id: '2', 
+    owner_id: '2',
+    product_details: {
+      product_ids: [2,4,6], 
+      quantities: [1,3,4]
+    },
+    status: 'Paid'
+  },
+  {
+    id: '3', 
+    owner_id: '3', 
+    product_details: {
+      product_ids: [4,7,8], 
+      quantities: [2,2,2]
+    },
+    status: 'Shipped'
+  }
+]
+
+let users = [
+  {
+    id: '1', 
+    order_id: '1',
+    first_name: 'Nguyen',
+    last_name: 'Doan',
+    gender: 'male', 
+    mobile: '0909123456', 
+    email: "nguyen.doan@gmail.com",
+    address_longitude: 1.234, 
+    address_latitude: 9.123
+  },
+  {
+    id: '2', 
+    order_id: '2',
+    first_name: 'Toan',
+    last_name: 'Nguyen',
+    gender: 'male',
+    mobile: '0123585145', 
+    email: "toan.nguyen@gmail.com",
+    address_longitude: 2.234, 
+    address_latitude: 3.123
+  },
+  {
+    id: '3', 
+    cart_id: '3',
+    first_name: 'Duy',
+    last_name: 'Nguyen',
+    gender: 'male',
+    mobile: '0914123456', 
+    email: "duy.nguyen@gmail.com",
+    address_longitude: 3.234, 
+    address_latitude: 6.123
+  }
+]
+
 export default {
   categories,
   products,
+  users,
+  carts
 };
