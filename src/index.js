@@ -21,11 +21,6 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-// getTopProduct()
-app.get('/topProducts', (req, res) => {
-  res.send(models.products);
-});
-
 app.listen(process.env.PORT || 3000, () =>
   console.log(`Express server currently running on port ${PORT}`)
 );

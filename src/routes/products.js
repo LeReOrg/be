@@ -2,6 +2,11 @@ import { Router } from 'express';
 import models from '../models';
 
 const router = Router();
+
+//getProducts
+router.get('/', (req, res) => {
+  res.send(models.products);
+});
   
 // filter products by price: increase
 router.get('/filterByPrice/inc', (req, res) => {

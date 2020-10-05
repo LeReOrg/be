@@ -4,7 +4,7 @@ import models from '../models';
 const router = Router(); 
 
 // getProductsByCartID()
-router.get('/:cartId', (req, res) => {
+router.get('/getProductByCartId/:cartId', (req, res) => {
     let products = { 
         ids: [],
         quantities: []
