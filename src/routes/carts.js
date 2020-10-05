@@ -6,12 +6,12 @@ const router = Router();
 // getProductsByCartID()
 router.get('/getProductByCartId/:cartId', (req, res) => {
     let products = { 
-        ids: [],
+        product_ids: [],
         quantities: []
     }
     for (let cart in models.carts) {
         if (models.carts[cart].id === req.params["cartId"]){
-            products.ids = models.carts[cart].product_details.product_ids
+            products.product_ids = models.carts[cart].product_details.product_ids
             products.quantities = models.carts[cart].product_details.quantities
             break
         }

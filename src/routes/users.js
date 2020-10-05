@@ -5,7 +5,7 @@ const router = Router();
 
 // getCartByUserID()
 router.get('/getCartByUserId/:userId', (req, res) => {
-    let cart = models.carts.filter(cart => cart.id === req.params["userId"]); 
+    let cart = models.carts.filter(cart => cart.owner_id === req.params["userId"]); 
     res.send(cart);
 });
 

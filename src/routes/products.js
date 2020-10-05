@@ -4,7 +4,7 @@ import models from '../models';
 const router = Router();
 
 //getProducts
-router.get('/', (req, res) => {
+router.get('/getProducts', (req, res) => {
   res.send(models.products);
 });
   
