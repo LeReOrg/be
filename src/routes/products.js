@@ -37,7 +37,7 @@ router.get('/filterByPrice/dec', (req, res) => {
 });
   
 // getProductByCategory()
-router.get('/:categoryId', (req, res) => {
+router.get('/getByCategoryId/:categoryId', (req, res) => {
     let products = [];
     for (let product in models.products) {
       if (models.products[product].category_id === req.params["categoryId"]) {
@@ -46,5 +46,15 @@ router.get('/:categoryId', (req, res) => {
     }
     res.send(products);
 });
+
+// getProductById
+router.get('/getById/:Id', (req, res) => { 
+    for (let product in models.products) { 
+      if (models.products[product].id === req.params["Id"]) {
+        res.send(models.products[product])
+        break
+      }
+    }
+})
 
 export default router;

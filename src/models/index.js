@@ -1,35 +1,43 @@
 let categories = [
   {
     id: '1',
-    name: 'Giày dép'
+    name: 'Giày dép',
+    image_url: 'https://p0.pikist.com/photos/276/90/shoes-tourism-dirt-camping-motion-travel-thumbnail.jpg'
   },
   {
     id: '2',
-    name: 'Ba lô'
+    name: 'Ba lô',
+    image_url: 'https://d2a2wjuuf1c30f.cloudfront.net/product_photos/65380347/file_c54337fa3f_original.jpg'
   },
   {
     id: '3',
-    name: 'Lều trại'
+    name: 'Lều trại',
+    image_url: 'https://i.pinimg.com/originals/a3/1a/2b/a31a2bf1349dabd6d35bf3dc01ec247d.png'
   },
   {
     id: '4',
-    name: 'Đồ điện tử'
+    name: 'Đồ điện tử',
+    image_url: 'https://www.beachcamera.com/shop/product-image.aspx?size=500&picId=513380'
   },
   {
     id: '5',
-    name: 'Xe máy'
+    name: 'Xe máy',
+    image_url: 'https://motorvina.com/wp-content/uploads/2016/10/honda-win-rent-sell-buy-hue-da-nang-hoi-an-motorvina-hanoi-motorbike-rental-hue-motorbike-rental-da-nang-motorbike-rental-ho-chi-minh-motorbike-rentalsemi-bike-rental-honda-win-.jpg'
   },
   {
     id: '6',
-    name: 'Dụng cụ nấu ăn'
+    name: 'Dụng cụ nấu ăn',
+    image_url: 'https://thegioidogiadung.com.vn/20473-large_default/b-dng-c-nau-an-6-mon-wmf.jpg'
   },
   {
     id: '7',
-    name: 'Dụng cụ đa năng'
+    name: 'Dụng cụ đa năng',
+    image_url: 'https://cdn.boba.vn/static/san-pham/nha-cua/thiet-bi-va-dung-cu-sua-chua/thiet-bi-dung-cu-sua-chua-khac/bo-dung-cu-da-nang-jeep-9-in1/dung-cu-jeep-11.png'
   },
   {
     id: '8',
-    name: 'Các loại khác'
+    name: 'Các loại khác',
+    image_url: 'https://s.meta.com.vn/Data/image/2020/06/15/bao-cao-su-durex-fetherlite-ultima-hop-12-chiec.jpg'
   }
 ];
 
