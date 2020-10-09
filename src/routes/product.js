@@ -3,8 +3,8 @@ import models from '../models';
 
 const router = Router();
 
-//getProducts
-router.get('/getProducts', (req, res) => {
+//getTopProducts
+router.get('/getTopProduct', (req, res) => {
   res.send(models.products);
 });
   
@@ -36,8 +36,8 @@ router.get('/filterByPrice/dec', (req, res) => {
     res.send(sortable);
 });
   
-// getProductByCategory()
-router.get('/getByCategoryId/:categoryId', (req, res) => {
+// getProductByCategoryId()
+router.get('/getProductByCategoryId/:categoryId', (req, res) => {
     let products = [];
     for (let product in models.products) {
       if (models.products[product].category_id === req.params["categoryId"]) {
@@ -48,7 +48,7 @@ router.get('/getByCategoryId/:categoryId', (req, res) => {
 });
 
 // getProductById
-router.get('/getById/:Id', (req, res) => { 
+router.get('/getProductById/:Id', (req, res) => { 
     for (let product in models.products) { 
       if (models.products[product].id === req.params["Id"]) {
         res.send(models.products[product])

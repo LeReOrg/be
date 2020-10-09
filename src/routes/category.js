@@ -4,7 +4,7 @@ import models from '../models';
 const router = Router(); 
 
 // getCategory()
-router.get('/', (req, res) => {
+router.get('/getCategory', (req, res) => {
     res.send(models.categories);
 });
 

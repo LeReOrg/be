@@ -11,10 +11,10 @@ const PORT = 3000;
 app.use(cors());
 
 // Modular routes
-app.use('/categories', routes.categories);
-app.use('/products', routes.products);
-app.use('/users', routes.users);
-app.use('/carts', routes.carts);
+app.use('/category', routes.category);
+app.use('/product', routes.product);
+app.use('/user', routes.user);
+app.use('/cart', routes.cart);
 
 // hello world
 app.get('/', (req, res) => {
