@@ -45,6 +45,7 @@ let products = [
   {
     id: '1',
     category_id: '1',
+    owner_id: '1',
     name: 'Đôi giày',
     image_url: 'https://p0.pikist.com/photos/276/90/shoes-tourism-dirt-camping-motion-travel-thumbnail.jpg',
     thumbnails: [
@@ -52,11 +53,12 @@ let products = [
       'https://www.rei.com/media/5bbcbee2-1b95-4b9a-9347-065a3937152c?size=784x588',
     ],
     price: 1000000,
-    owner_id: '1'
+    in_stock: 10
   },
   {
     id: '2',
     category_id: '2',
+    owner_id: '2',
     name: 'Ba lô TNF',
     image_url: 'https://d2a2wjuuf1c30f.cloudfront.net/product_photos/65380347/file_c54337fa3f_original.jpg',
     thumbnails: [
@@ -64,11 +66,12 @@ let products = [
       'https://images.thenorthface.com/is/image/TheNorthFace/NF0A3KV3_JK3_hero?$PDP-SCHEMA$',
     ],
     price: 200000,
-    owner_id: '2'
+    in_stock: 10
   },
   {
     id: '3',
     category_id: '3',
+    owner_id: '3',
     name: 'Lều 4 người',
     image_url: 'https://i.pinimg.com/originals/a3/1a/2b/a31a2bf1349dabd6d35bf3dc01ec247d.png',
     thumbnails: [
@@ -76,11 +79,12 @@ let products = [
       'https://www.rei.com/dam/skrobecki_071217_1458_tents_camping_choose_tents_for_camping_choose_lg.jpg',
     ],
     price: 200000,
-    owner_id: '3'
+    in_stock: 10
   },
   {
     id: '4',
     category_id: '4',
+    owner_id: '4',
     name: 'Thiết bị GPS',
     image_url: 'https://www.beachcamera.com/shop/product-image.aspx?size=500&picId=513380',
     thumbnails: [
@@ -88,11 +92,12 @@ let products = [
       'https://www.rei.com/dam/skrobecki_071217_1458_tents_camping_choose_tents_for_camping_choose_lg.jpg',
     ],
     price: 300000,
-    owner_id: '4'
+    in_stock: 10
   },
   {
     id: '5',
     category_id: '5',
+    owner_id: '5',
     name: 'Xe win',
     image_url: 'https://motorvina.com/wp-content/uploads/2016/10/honda-win-rent-sell-buy-hue-da-nang-hoi-an-motorvina-hanoi-motorbike-rental-hue-motorbike-rental-da-nang-motorbike-rental-ho-chi-minh-motorbike-rentalsemi-bike-rental-honda-win-.jpg',
     price: 100000,
@@ -101,10 +106,11 @@ let products = [
       'https://blogcdn.muaban.net/wp-content/uploads/2019/09/honda-win-100-tem-doi-2000-2001.jpg',
       'https://blogcdn.muaban.net/wp-content/uploads/2019/09/honda-win-100-tem-doi-2000-2001.jpg'
     ],
-    owner_id: '5'
+    in_stock: 10
   },
   {
     id: '6',
+    owner_id: '5',
     category_id: '1',
     name: 'Giay Adidas',
     image_url: 'https://www.accenture.com/t20190307T103005Z__w__/ph-en/_acnmedia/Accenture/Conversion-Assets/DotCom/Images/Global-3/99/Accenture-Adidas-Header-Image.jpg',
@@ -113,7 +119,7 @@ let products = [
       'https://lh3.googleusercontent.com/proxy/6zDKTEOUZek7duAhIYuVS5OSDTieCrFAY8J0wj4wmo76ffxoJ52Pn_OXrUEUlPzryJF8IWELNcGSImbryTSI5Uz6rLY4sJK4lP_agTLKM_lkz_51M-g6j5ymAXyKvTLS0LAa',
     ],
     price: 500000,
-    owner_id: '5'
+    in_stock: 10
   }
 ];
 
