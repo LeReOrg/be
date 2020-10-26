@@ -132,7 +132,9 @@ let carts = [
       product_ids: [1,2,3], 
       quantities: [3,3,4]
     },
-    status: 'Unpaid'
+    status: 'Unpaid',
+    from_date: new Date ('2021-01-01'),
+    to_date: new Date('2021-01-05')
   },
   {
     id: '2', 
@@ -141,7 +143,9 @@ let carts = [
       product_ids: [2,4,6], 
       quantities: [1,3,4]
     },
-    status: 'Paid'
+    status: 'Paid',
+    from_date: new Date ('2021-01-01'),
+    to_date: new Date('2021-01-03')
   },
   {
     id: '3', 
@@ -150,7 +154,9 @@ let carts = [
       product_ids: [4,7,8], 
       quantities: [2,2,2]
     },
-    status: 'Shipped'
+    status: 'Shipped',
+    from_date: new Date ('2021-01-01'),
+    to_date: new Date('2021-01-22')
   }
 ]
 

@@ -19,4 +19,14 @@ router.get('/getProductByCartId/:cartId', (req, res) => {
     res.send(products);
 });
 
+// getCartByOwnerId()
+router.get('/getCartByOwnerId/:OwnerId', (req, res) => {
+    for (let cart in models.carts) {
+        if (models.carts[cart].owner_id === req.params["OwnerId"]){
+            res.send(models.carts[cart])
+            break
+        }
+    }
+});
+
 export default router;
