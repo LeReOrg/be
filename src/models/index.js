@@ -50,7 +50,10 @@ let products = [
     image_url: 'https://p0.pikist.com/photos/276/90/shoes-tourism-dirt-camping-motion-travel-thumbnail.jpg',
     thumbnails: [
       'https://www.rei.com/media/5bbcbee2-1b95-4b9a-9347-065a3937152c?size=784x588',
-      'https://www.rei.com/media/5bbcbee2-1b95-4b9a-9347-065a3937152c?size=784x588',
+      'https://s7d4.scene7.com/is/image/WolverineWorldWide/MRLM-J06039-071816-S17-HERO?wid=3000&hei=2475&fmt=jpeg&qlt=80,0&op_sharpen=0&resMode=bilin&op_usm=0.5,1.0,8,0&iccEmbed=0&printRes=72',
+      'https://s7d4.scene7.com/is/image/WolverineWorldWide/MRLM-J06039-071816-S17-060?wid=3000&hei=2475&fmt=jpeg&qlt=80,0&op_sharpen=0&resMode=bilin&op_usm=0.5,1.0,8,0&iccEmbed=0&printRes=72',
+      'https://s7d4.scene7.com/is/image/WolverineWorldWide/MRLM-J06039-071816-S17-OUT?wid=3000&hei=2475&fmt=jpeg&qlt=80,0&op_sharpen=0&resMode=bilin&op_usm=0.5,1.0,8,0&iccEmbed=0&printRes=72',
+      'https://s7d4.scene7.com/is/image/WolverineWorldWide/MRLM-J06039-071816-S17-TOP?wid=3000&hei=2475&fmt=jpeg&qlt=80,0&op_sharpen=0&resMode=bilin&op_usm=0.5,1.0,8,0&iccEmbed=0&printRes=72'
     ],
     price: 1000000,
     in_stock: 10
