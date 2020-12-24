@@ -1,13 +1,12 @@
 import express from "express";
 import cors from "cors";
-import MongoClient from "mongodb"; 
+import mongoose from "mongoose"; 
+require('dotenv').config();
 
-import models from './models';
 import routes from './routes';
 
 const app = express();
-const PORT = 3000;
-const connectionString = 'mongodb+srv://npdoan1996:1npoyZqDpq6FK5VF@leaseandrent.k1rme.mongodb.net/<dbname>?retryWrites=true&w=majority'
+const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
@@ -18,17 +17,20 @@ app.use('/product', routes.product);
 app.use('/user', routes.user);
 app.use('/cart', routes.cart);
 
+// Database Initialization
+const uri = process.env.ATLAS_URI
+mongoose.connect(uri, { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true }
+  );
+const connection = mongoose.connection;
+connection.once('open', () => {
+  console.log("MongoDB database connection established successfully");
+})
+
 // hello world
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-MongoClient.connect(connectionString, {useUnifiedTopology: true})
-  .then(client => {
-    console.log('Connected to Database')
-  })
-  .catch(error => console.error(error))
-
-app.listen(process.env.PORT || 3000, () =>
-  console.log(`Express server currently running on port ${PORT}`)
+app.listen(port, () =>
+  console.log(`Express server currently running on port ${port}`)
 );
