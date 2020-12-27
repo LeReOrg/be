@@ -1,7 +1,14 @@
 import { Router } from 'express';
 import models from '../models';
+import Product from '../models/product';
 
 const router = Router();
+
+router.get('/', (req, res) => {
+  Product.find()
+    .then(product => res.send(product))
+    .catch(err => res.status(400).json('Error: ' + err))
+});
 
 //getTopProducts
 router.get('/getTopProduct', (req, res) => {
