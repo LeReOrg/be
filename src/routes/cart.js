@@ -1,7 +1,14 @@
 import { Router } from 'express'; 
 import models from '../models';
+import Cart from '../models/cart'; 
 
 const router = Router(); 
+
+router.get('/', (req, res) => {
+    Cart.find()
+      .then(cart => res.json(cart))
+      .catch(err => res.status(400).json('Error: ' + err));
+});
 
 // getProductsByCartID()
 router.get('/getProductByCartId/:cartId', (req, res) => {
