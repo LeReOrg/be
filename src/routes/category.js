@@ -4,15 +4,11 @@ import Category from '../models/category';
 
 const router = Router(); 
 
-router.get('/', (req, res) => {
+// getCategory
+router.get('/getCategory', (req, res) => {
   Category.find()
     .then(category => res.json(category))
     .catch(err => res.status(400).json('Error: ' + err));
-});
-
-// getCategory
-router.get('/getCategory', (req, res) => {
-    res.send(models.categories);
 });
 
 	
