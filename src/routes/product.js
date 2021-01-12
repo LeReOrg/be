@@ -71,4 +71,31 @@ router.get('/getProductById/:Id', (req, res) => {
     .catch(err => res.status(500).json('Error: ' + err))
 })
 
+// addProduct
+router.post('/addProduct', (req,res) => {
+  const id = req.body.id;
+  const category_id = req.body.category_id
+  const owner_id = req.body.owner_id
+  const name = req.body.name;
+  const image_url = req.body.image_url;
+  const thumbnails = req.body.thumbnails;
+  const price = req.body.price;
+  const in_stock = req.body.in_stock;
+
+  const newProduct = new Product({
+    id,
+    category_id,
+    owner_id,
+    name,
+    image_url,
+    thumbnails,
+    price,
+    in_stock
+  });
+
+  newProduct.save()
+    .then(() => res.json('Product added!'))
+    .catch(err => res.status(400).json('Error: ' + err));
+});
+
 export default router;
