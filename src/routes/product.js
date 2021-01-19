@@ -18,6 +18,13 @@ router.get('/getProductByPage/:page', (req, res) => {
     limit: parseInt(req.params["limit"], 10) || 10
   };
 
+  let page = 0;
+  Product.countDocuments({}, function(err, count){
+    if (!err) {
+      page = ~~(count / pageOptions.limit) + 1;
+    }
+  });
+
   Product.find()
     .skip(pageOptions.page * pageOptions.limit)
     .limit(pageOptions.limit)
@@ -26,7 +33,13 @@ router.get('/getProductByPage/:page', (req, res) => {
         res.status(500).json(err);
         return;
       }
-      res.status(200).json(product);
+      let result = {};
+      let keyPage = 'numPage';
+      let keyProduct = 'products';
+      result[keyPage] = page;
+      result[keyProduct] = product;
+
+      res.status(200).json(result);
     });
 });
 
