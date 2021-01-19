@@ -6,34 +6,23 @@ const router = Router();
 
 router.get('/', (req, res) => {
     Cart.find()
-      .then(cart => res.json(cart))
+      .then(cart => res.status(200).json(cart))
       .catch(err => res.status(400).json('Error: ' + err));
 });
 
 // getProductsByCartID()
 router.get('/getProductByCartId/:cartId', (req, res) => {
-    let products = { 
-        product_ids: [],
-        quantities: []
-    }
-    for (let cart in models.carts) {
-        if (models.carts[cart].id === req.params["cartId"]){
-            products.product_ids = models.carts[cart].product_details.product_ids
-            products.quantities = models.carts[cart].product_details.quantities
-            break
-        }
-    }
-    res.send(products);
+    Cart.find({id: req.params["cartId"]})
+        .select({ product_details: 1 })
+        .then(cart => res.status(200).json(cart))
+        .catch(err => res.status(400).json('Error: ' + err));
 });
 
-// getCartByOwnerId()
+// getCartByOwnerId/:OwnerId
 router.get('/getCartByOwnerId/:OwnerId', (req, res) => {
-    for (let cart in models.carts) {
-        if (models.carts[cart].owner_id === req.params["OwnerId"]){
-            res.send(models.carts[cart])
-            break
-        }
-    }
+    Cart.find({owner_id: req.params["OwnerId"]})
+      .then(cart => res.status(200).json(cart))
+      .catch(err => res.status(400).json('Error: ' + err));
 });
 
 export default router;

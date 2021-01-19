@@ -56,51 +56,59 @@ router.get('/getProductPage', (req, res) => {
 
 // filter products by price: increase
 router.get('/filterByPrice/inc', (req, res) => {
-    let sortable = [];
-    for (let product in models.products) {
-      sortable.push(models.products[product])
-    }
-    sortable.sort(function (v1, v2) {
-      if(v1.price < v2.price) { return -1; }
-      if(v1.price > v2.price) { return 1; }
-      return 0;
-    });
-    res.send(sortable);
+  Product.find()
+    .sort({price: 1})
+    .then(product => res.status(200).json(product))
+    .catch(err => res.status(500).json('Error: ' + err))
 });
 
 // filter products by price: decrease
 router.get('/filterByPrice/dec', (req, res) => {
-    let sortable = [];
-    for (let product in models.products) {
-      sortable.push(models.products[product])
-    }
-    sortable.sort(function (v1, v2) {
-      if(v1.price > v2.price) { return -1; }
-      if(v1.price < v2.price) { return 1; }
-      return 0;
-    });
-    res.send(sortable);
+  Product.find()
+    .sort({price: -1})
+    .then(product => res.status(200).json(product))
+    .catch(err => res.status(500).json('Error: ' + err))
 });
   
 // getProductByCategoryId()
 router.get('/getProductByCategoryId/:categoryId', (req, res) => {
-    let products = [];
-    for (let product in models.products) {
-      if (models.products[product].category_id === req.params["categoryId"]) {
-        products.push(models.products[product])
-      }
-    }
-    res.send(products);
+  Product.find({category_id: req.params["categoryId"]})
+    .then(product => res.status(200).json(product))
+    .catch(err => res.status(500).json('Error: ' + err))  
 });
 
 // getProductById
 router.get('/getProductById/:Id', (req, res) => { 
-    for (let product in models.products) { 
-      if (models.products[product].id === req.params["Id"]) {
-        res.send(models.products[product])
-        break
-      }
-    }
+  Product.find({id: req.params["Id"]})
+    .then(product => res.status(200).json(product))
+    .catch(err => res.status(500).json('Error: ' + err))
 })
+
+// addProduct
+router.post('/addProduct', (req,res) => {
+  const id = req.body.id;
+  const category_id = req.body.category_id
+  const owner_id = req.body.owner_id
+  const name = req.body.name;
+  const image_url = req.body.image_url;
+  const thumbnails = req.body.thumbnails;
+  const price = req.body.price;
+  const in_stock = req.body.in_stock;
+
+  const newProduct = new Product({
+    id,
+    category_id,
+    owner_id,
+    name,
+    image_url,
+    thumbnails,
+    price,
+    in_stock
+  });
+
+  newProduct.save()
+    .then(() => res.json('Product added!'))
+    .catch(err => res.status(400).json('Error: ' + err));
+});
 
 export default router;
