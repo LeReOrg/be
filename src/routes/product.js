@@ -6,9 +6,34 @@ const router = Router();
 
 // getTopProducts
 router.get('/getTopProduct', (req, res) => {
+  const pageOptions = {
+    page: parseInt(req.query["page"], 10) || 0,
+    limit: parseInt(req.query["limit"], 10) || 10
+  };
+
+  let page = 0;
+  Product.countDocuments({}, function(err, count){
+    if (!err) {
+      page = ~~(count / pageOptions.limit) + 1;
+    }
+  });
+
   Product.find()
-    .then(product => res.status(200).json(product))
-    .catch(err => res.status(500).json('Error: ' + err))
+    .skip(pageOptions.page * pageOptions.limit)
+    .limit(pageOptions.limit)
+    .exec(function (err, product) {
+      if (err) {
+        res.status(500).json(err);
+        return;
+      }
+      let result = {};
+      let keyPage = 'numPage';
+      let keyProduct = 'products';
+      result[keyPage] = page;
+      result[keyProduct] = product;
+
+      res.status(200).json(result);
+    })
 });
 
 // getProductByPage
