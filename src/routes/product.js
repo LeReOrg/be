@@ -21,6 +21,7 @@ router.get('/getTopProduct', (req, res) => {
   Product.find()
     .skip(pageOptions.page * pageOptions.limit)
     .limit(pageOptions.limit)
+    .populate('category')
     .exec(function (err, product) {
       if (err) {
         res.status(500).json(err);
@@ -36,7 +37,7 @@ router.get('/getTopProduct', (req, res) => {
     })
 });
 
-// getProductByPage
+// getProductByPage 
 router.get('/getProductByPage/:page', (req, res) => {
   const pageOptions = {
     page: parseInt(req.params["page"], 10) || 0,
@@ -105,6 +106,14 @@ router.get('/getProductByCategoryId/:categoryId', (req, res) => {
 // getProductById
 router.get('/getProductById/:Id', (req, res) => { 
   Product.find({id: req.params["Id"]})
+    .then(product => res.status(200).json(product))
+    .catch(err => res.status(500).json('Error: ' + err))
+})
+
+// getFirstImage
+router.get('/getFirstImage/:Id', (req, res) => {
+  Product.find({id: req.params["Id"]})
+    .select({ image_url : 1 , _id: 0})
     .then(product => res.status(200).json(product))
     .catch(err => res.status(500).json('Error: ' + err))
 })
