@@ -95,7 +95,6 @@ router.post('/addProduct', (req,res) => {
   const image_url = req.body.image_url;
   const image_url_thumbnails = req.body.image_url_thumbnails;
   const cover_image = req.body.cover_image;
-  const thumbnails = req.body.thumbnails;
   const price = req.body.price;
   const in_stock = req.body.in_stock;
 
@@ -107,7 +106,6 @@ router.post('/addProduct', (req,res) => {
     image_url,
     image_url_thumbnails,
     cover_image,
-    thumbnails,
     price,
     in_stock
   });

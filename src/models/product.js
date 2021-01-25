@@ -9,13 +9,14 @@ const productSchema = new Schema({
   name: { type: String, required: true},
   image_url: { type: String, required: true},
   image_url_thumbnails: { type: String, default: 'null'},
-  cover_image: [ String ],
-  thumbnails: [ String ],
+  cover_image: { type: [String], default: ['null', 'null']},
   price: { type: Number, required: true},
   in_stock: { type: Number, required: true},
 }, {
   timestamps: true,
 });
+
+productSchema.index({cover_image : '2d'});
 
 const Product = mongoose.model('Product', productSchema);
 
