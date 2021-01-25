@@ -5,7 +5,7 @@ import Product from '../models/product';
 const router = Router();
 
 // getTopProducts
-router.get('/getTopProduct', (req, res) => {
+router.get('/getTopProduct/:page', (req, res) => {
   const pageOptions = {
     page: parseInt(req.query["page"], 10) || 0,
     limit: parseInt(req.query["limit"], 10) || 10
