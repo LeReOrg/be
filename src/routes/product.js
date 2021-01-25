@@ -37,38 +37,6 @@ router.get('/getTopProduct/:page', (req, res) => {
     })
 });
 
-// getProductByPage 
-router.get('/getProductByPage/:page', (req, res) => {
-  const pageOptions = {
-    page: parseInt(req.params["page"], 10) || 0,
-    limit: parseInt(req.params["limit"], 10) || 10
-  };
-
-  let page = 0;
-  Product.countDocuments({}, function(err, count){
-    if (!err) {
-      page = ~~(count / pageOptions.limit) + 1;
-    }
-  });
-
-  Product.find()
-    .skip(pageOptions.page * pageOptions.limit)
-    .limit(pageOptions.limit)
-    .exec(function (err, product) {
-      if (err) {
-        res.status(500).json(err);
-        return;
-      }
-      let result = {};
-      let keyPage = 'numPage';
-      let keyProduct = 'products';
-      result[keyPage] = page;
-      result[keyProduct] = product;
-
-      res.status(200).json(result);
-    });
-});
-
 // getProductPage
 router.get('/getProductPage', (req, res) => {
   Product.countDocuments({}, function(err, count){
@@ -125,6 +93,8 @@ router.post('/addProduct', (req,res) => {
   const owner_id = req.body.owner_id
   const name = req.body.name;
   const image_url = req.body.image_url;
+  const image_url_thumbnails = req.body.image_url_thumbnails;
+  const cover_image = req.body.cover_image;
   const thumbnails = req.body.thumbnails;
   const price = req.body.price;
   const in_stock = req.body.in_stock;
@@ -135,6 +105,8 @@ router.post('/addProduct', (req,res) => {
     owner_id,
     name,
     image_url,
+    image_url_thumbnails,
+    cover_image,
     thumbnails,
     price,
     in_stock

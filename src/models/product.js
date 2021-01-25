@@ -8,6 +8,8 @@ const productSchema = new Schema({
   owner_id: { type: String, required: true},
   name: { type: String, required: true},
   image_url: { type: String, required: true},
+  image_url_thumbnails: { type: String, required: true},
+  cover_image: [ String ],
   thumbnails: [ String ],
   price: { type: Number, required: true},
   in_stock: { type: Number, required: true},
