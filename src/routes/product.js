@@ -89,30 +89,33 @@ router.get('/getFirstImage/:Id', (req, res) => {
 // addProduct
 router.post('/addProduct', (req,res) => {
   const id = req.body.id;
-  const category_id = req.body.category_id
-  const owner_id = req.body.owner_id
+  const category = req.body.category;
+  const owner_id = req.body.owner_id;
   const name = req.body.name;
-  const image_url = req.body.image_url;
-  const image_url_thumbnails = req.body.image_url_thumbnails;
-  const cover_image = req.body.cover_image;
+  const image = req.body.image;
+  const cover_images = req.body.cover_images; 
   const price = req.body.price;
   const in_stock = req.body.in_stock;
+  const description = req.body.description;
+  const location = req.body.location;
 
   const newProduct = new Product({
     id,
-    category_id,
-    owner_id,
+    category,
+    owner_id, 
     name,
-    image_url,
-    image_url_thumbnails,
-    cover_image,
+    image,
+    cover_images,
     price,
-    in_stock
+    in_stock,
+    description,
+    location
   });
-
   newProduct.save()
     .then(() => res.json('Product added!'))
     .catch(err => res.status(400).json('Error: ' + err));
 });
+
+// db.products.update({id: '17'}, {$set: {location: {longtitude: 100.113, latitude: 89.232}}}, {multi: true}) script for add new field
 
 export default router;
