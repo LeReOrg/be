@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import models from '../models';
 import Product from '../models/product';
 
 const router = Router();
@@ -7,8 +6,8 @@ const router = Router();
 // getTopProducts
 router.get('/getTopProduct/:page', (req, res) => {
   const pageOptions = {
-    page: parseInt(req.query["page"], 10) || 0,
-    limit: parseInt(req.query["limit"], 10) || 10
+    page: parseInt(req.params["page"], 10) || 0,
+    limit: parseInt(req.body["limit"], 10) || 10
   };
 
   let page = 0;
@@ -22,6 +21,7 @@ router.get('/getTopProduct/:page', (req, res) => {
     .skip(pageOptions.page * pageOptions.limit)
     .limit(pageOptions.limit)
     .populate('category')
+    .populate({ path: 'owner_id', select: 'first_name last_name email'})
     .exec(function (err, product) {
       if (err) {
         res.status(500).json(err);
@@ -74,6 +74,8 @@ router.get('/getProductByCategoryId/:categoryId', (req, res) => {
 // getProductById
 router.get('/getProductById/:Id', (req, res) => { 
   Product.find({id: req.params["Id"]})
+    .populate('category')
+    .populate({ path: 'owner_id', select: 'first_name last_name email'})
     .then(product => res.status(200).json(product))
     .catch(err => res.status(500).json('Error: ' + err))
 })
