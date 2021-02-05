@@ -18,14 +18,6 @@ app.use('/category', routes.category);
 app.use('/product', routes.product);
 app.use('/user', routes.user);
 app.use('/cart', routes.cart);
-app.post('/sendemail', (req, res) => {
-  const mailOptions = req.body
-  sendEmail(mailOptions)
-  .then(() => {
-    res.status(200).json({msg: "message sent"})
-  })
-  .catch((err) => res.status(400).json('Error: ' + err))
-})
 
 // Database Initialization
 const uri = process.env.ATLAS_URI
