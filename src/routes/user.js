@@ -27,7 +27,6 @@ router.post('/validateToken', (req, res) => {
   }
 });
 
-<<<<<<< HEAD
 // signup
 router.post('/signup', (req, res) => { 
 
@@ -50,7 +49,7 @@ router.post('/signup', (req, res) => {
   })
   .catch(err => res.status(400).json('Error: ' + err));
 })
-=======
+
 // loginFirebase()
 router.post('/loginFirebase', (req, res) => {
   let inputToken = req.body.token;
@@ -66,7 +65,6 @@ router.post('/loginFirebase', (req, res) => {
       )
     .catch(err => res.status(500).json('Error: ' + err))
 });
->>>>>>> 006cbd341007937db3be81bd4429dd729e190ed7
 
 // getCartByUserID()
 router.get('/getCartByUserId/:userId', (req, res) => {
