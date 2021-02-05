@@ -12,6 +12,7 @@ const userSchema = new Schema({
   email: { type: String, required: true},
   address_longitude: { type: Number, required: true},
   address_latitude: { type: Number, required: true},
+  firebase_token: { type: String}
 }, {
   timestamps: true,
 });
