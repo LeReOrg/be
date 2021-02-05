@@ -25,6 +25,29 @@ router.post('/validateToken', (req, res) => {
   }
 });
 
+// signup
+router.post('/signup', (req, res) => { 
+
+  User.findOne({'authentication.username': req.body.username})
+  .then((user) => {
+    if(user != null) {
+      res.status(403).json({'Error': 'User already exists'})
+    }
+    else {
+      User.create({
+        authentication: {
+          username: req.body.username,
+          password: req.body.password
+        }
+      })
+      .then((user) => {
+        res.status(200).json({status: 'Registration Successful!', user: user})
+      })
+    }
+  })
+  .catch(err => res.status(400).json('Error: ' + err));
+})
+
 // getCartByUserID()
 router.get('/getCartByUserId/:userId', (req, res) => {
   Cart.find({owner_id: req.params["userId"]})
