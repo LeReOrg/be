@@ -19,6 +19,7 @@ const userSchema = new Schema({
   email: { type: String},
   address_longitude: { type: Number, required: true, default: 1.0000},
   address_latitude: { type: Number, required: true, default: 1.0000},
+  firebase_token: { type: String},
   authentication: userAuthenSchema
 }, {
   timestamps: true,
