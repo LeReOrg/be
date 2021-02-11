@@ -3,8 +3,8 @@ import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
 const imageSchema = new Schema({
-  large_url: String,
-  small_url: String
+  original: String,
+  thumbnail: String
 }, {
   timestamps: true,
 });

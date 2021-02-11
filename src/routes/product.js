@@ -66,7 +66,7 @@ router.get('/filterByPrice/dec', (req, res) => {
   
 // getProductByCategoryId()
 router.get('/getProductByCategoryId/:categoryId', (req, res) => {
-  Product.find({category_id: req.params["categoryId"]})
+  Product.find({category: req.params["categoryId"]})
     .then(product => res.status(200).json(product))
     .catch(err => res.status(500).json('Error: ' + err))  
 });
