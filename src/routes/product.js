@@ -48,6 +48,20 @@ router.get('/getProductPage', (req, res) => {
   });
 });
 
+// getAllProduct
+router.get('/getAllProduct', (req, res) => {
+  Product.find()
+    .populate('category')
+    .populate({ path: 'owner_id', select: 'first_name last_name email'})
+    .exec(function (err, products) {
+      if (err) {
+        res.status(500).json(err);
+        return;
+      }
+      res.status(200).json(products);
+    })
+});
+
 // filter products by price: increase
 router.get('/filterByPrice/inc', (req, res) => {
   Product.find()
