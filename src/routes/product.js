@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import Product from '../models/product';
+import mongoose from "mongoose";
 
 const router = Router();
 
@@ -80,13 +81,26 @@ router.get('/filterByPrice/dec', (req, res) => {
   
 // getProductByCategoryId()
 router.get('/getProductByCategoryId/:categoryId', (req, res) => {
-  Product.find({category: req.params["categoryId"]})
-    .then(product => res.status(200).json(product))
-    .catch(err => res.status(500).json('Error: ' + err))  
+  let cateString = JSON.stringify(req.params["categoryId"])
+  Product.find({})
+    .populate('category')
+    .populate({ path: 'owner_id', select: 'first_name last_name email'})
+    .then(product => {
+      let prod = [];
+      product.forEach(function(p) {
+        let cateIdString = JSON.stringify(p.category._id)
+        if (cateIdString === cateString) {
+          prod = prod.concat(p)
+        }
+      });
+
+      res.status(200).json(prod)
+    })
+    .catch(err => res.status(500).json('Error: ' + err))
 });
 
 // getProductById
-router.get('/getProductById/:Id', (req, res) => { 
+router.get('/getProductById/:Id', (req, res) => {
   Product.find({id: req.params["Id"]})
     .populate('category')
     .populate({ path: 'owner_id', select: 'first_name last_name email'})
