@@ -80,21 +80,37 @@ router.get('/filterByPrice/dec', (req, res) => {
 });
   
 // getProductByCategoryId()
-router.get('/getProductByCategoryId/:categoryId', (req, res) => {
+router.get('/getProductByCategoryId/:categoryId/:page', (req, res) => {
+  const pageOptions = {
+    page: parseInt(req.params["page"], 10) || 0,
+    limit: parseInt(req.body["limit"], 10) || 10
+  };
+
+  let page = 0;
   let cateString = JSON.stringify(req.params["categoryId"])
   Product.find({})
     .populate('category')
     .populate({ path: 'owner_id', select: 'first_name last_name email'})
     .then(product => {
       let prod = [];
+      let count = 0; 
       product.forEach(function(p) {
         let cateIdString = JSON.stringify(p.category._id)
         if (cateIdString === cateString) {
           prod = prod.concat(p)
+          count++;
         }
       });
-
-      res.status(200).json(prod)
+      
+      let numPage = ~~(count/pageOptions.limit) + 1;
+      let result = {};
+      let keyPage = 'numPage';
+      let keyProduct = 'products';
+      result[keyPage] = numPage;
+      let start = pageOptions.page*pageOptions.limit; 
+      let stop = (start + pageOptions.limit) > (count)? count : start + pageOptions.limit; 
+      result[keyProduct] = prod.slice(start,stop);
+      res.status(200).json(result)
     })
     .catch(err => res.status(500).json('Error: ' + err))
 });
