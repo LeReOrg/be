@@ -40,7 +40,10 @@ router.post('/signup', (req, res) => {
         authentication: {
           username: req.body.username,
           password: req.body.password
-        }
+        },
+        first_name: req.body.first_name,
+        last_name: req.body.last_name,
+        email: req.body.email,
       })
       .then((user) => {
         res.status(200).json({status: 'Registration Successful!', user: user})
@@ -49,6 +52,47 @@ router.post('/signup', (req, res) => {
   })
   .catch(err => res.status(400).json('Error: ' + err));
 })
+
+// changePassword()
+router.post('/changePassword', (req, res) => {
+  let username = req.body.username
+  let new_password = req.body.new_password
+
+  User.findOne({'authentication.username': username})
+    .then((user) => {
+      if(user != null) {
+        res.status(403).json({'Error': 'User already exists'})
+        user.password = new_password
+        user.save()
+          .then(() => res.status(200).json({'Message': 'Ok'}))
+          .catch(err => res.status(400).json('Error: ' + err));
+      }
+      else {
+        res.status(200).json({'Message': 'User not found'})
+      }
+    })
+    .catch(err => res.status(400).json('Error: ' + err));
+});
+
+// login()
+router.post('/login', (req, res) => {
+  let username = req.body.username
+  let password = req.body.password
+
+  User.findOne({
+    'authentication.username': username,
+    'authentication.password': password,
+  })
+    .then((user) => {
+      if(user != null) {
+        res.status(200).json({'Message': 'Ok'})
+      }
+      else {
+        res.status(200).json({'Message': 'User not found'})
+      }
+    })
+    .catch(err => res.status(400).json('Error: ' + err));
+});
 
 // loginFirebase()
 router.post('/loginFirebase', (req, res) => {
