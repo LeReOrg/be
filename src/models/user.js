@@ -14,6 +14,7 @@ const userSchema = new Schema({
   order_id: { type: String},
   first_name: { type: String, required: true, default: "A"},
   last_name: { type: String, required: true, default: "Nguyen"},
+  full_name: { type: String, required: true, default: "Nguyen A"},
   gender: { type: String, required: true, default: "male"},
   mobile: { type: String, required: true, default: "113"},
   email: { type: String},
