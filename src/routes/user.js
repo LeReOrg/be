@@ -61,7 +61,6 @@ router.post('/changePassword', (req, res) => {
   User.findOne({email: email})
     .then((user) => {
       if(user != null) {
-        res.status(403).json({'Error': 'User already exists'})
         user.password = new_password
         user.save()
           .then(() => res.status(200).json({'Message': 'Ok'}))
