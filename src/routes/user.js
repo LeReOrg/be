@@ -76,10 +76,10 @@ router.post('/changePassword', (req, res) => {
 
 // login()
 router.post('/login', (req, res) => {
-  let username = req.body.username
+  let email = req.body.email
   let password = req.body.password
 
-  User.findOne({'authentication.username': username})
+  User.findOne({email: email})
     .then((user) => {
       if(user != null) {
         res.status(200).json({'Message': 'Ok'})
