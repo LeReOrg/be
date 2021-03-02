@@ -55,10 +55,10 @@ router.post('/signup', (req, res) => {
 
 // changePassword()
 router.post('/changePassword', (req, res) => {
-  let username = req.body.username
+  let email = req.body.email
   let new_password = req.body.new_password
 
-  User.findOne({'authentication.username': username})
+  User.findOne({email: email})
     .then((user) => {
       if(user != null) {
         res.status(403).json({'Error': 'User already exists'})
