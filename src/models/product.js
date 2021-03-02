@@ -10,9 +10,9 @@ const imageSchema = new Schema({
 });
 
 const productSchema = new Schema({
-  id: { type: String, required: true },
-  category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
-  owner_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  id: { type: String },
+  category: { type: Schema.Types.ObjectId, ref: 'Category' },
+  owner_id: { type: Schema.Types.ObjectId, ref: 'User' },
   name: { type: String, required: true },
   image: imageSchema  ,  
   cover_images: [imageSchema], 

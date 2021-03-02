@@ -267,28 +267,28 @@ router.get('/filterByLocation', (req,res) => {
 
 // addProduct
 router.post('/addProduct', (req,res) => {
-  const id = req.body.id;
-  const category = req.body.category;
-  const owner_id = req.body.owner_id;
+  // const id = req.body.id;
+  // const category = req.body.category;
+  // const owner_id = req.body.owner_id;
   const name = req.body.name;
-  const image = req.body.image;
-  const cover_images = req.body.cover_images; 
+  // const image = req.body.image;
+  // const cover_images = req.body.cover_images;
   const price = req.body.price;
   const in_stock = req.body.in_stock;
   const description = req.body.description;
-  const location = req.body.location;
+  // const location = req.body.location;
 
   const newProduct = new Product({
-    id,
-    category,
-    owner_id, 
+    // id,
+    // category,
+    // owner_id,
     name,
-    image,
-    cover_images,
+    // image,
+    // cover_images,
     price,
     in_stock,
-    description,
-    location
+    description
+    // location
   });
   newProduct.save()
     .then(() => res.json('Product added!'))
