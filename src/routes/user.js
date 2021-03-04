@@ -30,7 +30,7 @@ router.post('/validateToken', (req, res) => {
 // signup
 router.post('/signup', (req, res) => { 
 
-  User.findOne({'authentication.username': req.body.username})
+  User.findOne({email: req.body.email})
   .then((user) => {
     if(user != null) {
       res.status(403).json({'Error': 'User already exists'})
@@ -38,7 +38,6 @@ router.post('/signup', (req, res) => {
     else {
       User.create({
         authentication: {
-          username: req.body.username,
           password: req.body.password
         },
         full_name: req.body.full_name,
