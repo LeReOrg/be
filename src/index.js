@@ -1,43 +1,58 @@
 import express from "express";
-import cors from "cors";
-import mongoose from "mongoose"; 
-import sendEmail from "./send-email";
-require('dotenv').config();
+import { ConfigModule } from "./share/modules/config/config.module";
+import { LoggerModule } from "./share/modules/logger/logger.module";
+import { DatabaseModule } from "./share/modules/database/database.module";
+import CategoriesModule from "./business/modules/categories/categories.module";
+import ProductsModule from "./business/modules/products/products.module";
+import { CloudinaryModule } from "./share/modules/cloudinary/cloudinary.module";
 
-import routes from './routes';
+// // TODO: remove 3 lines below
+// import cors from "cors";
+// import routes from './routes';
+// import sendEmail from "./send-email";
 
+const config = ConfigModule.retrieveConfig();
+
+// Logger
+const logger = new LoggerModule("Express");
+
+// Database
+const mongooseOptions = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+};
+const databaseModule = new DatabaseModule(config.mongoDbUrl, mongooseOptions);
+databaseModule.connect();
+
+// Cloudinary
+const cloudinaryModule = new CloudinaryModule(config.cloudinary);
+cloudinaryModule.config();
+
+// Express
 const app = express();
-const port = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors());
+// app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+// TODO: Write a middleware file for this
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
 
-// Modular routes
-app.use('/category', routes.category);
-app.use('/product', routes.product);
-app.use('/user', routes.user);
-app.use('/cart', routes.cart);
+app.get('/health-check', (req, res) => res.send("OK"));
 
-// Database Initialization
-const uri = process.env.ATLAS_URI
-mongoose.connect(uri, { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true });
-const connection = mongoose.connection;
-connection.once('open', () => {
-  console.log("MongoDB database connection established successfully");
-})
+const pathPrefix = "/api/v1";
+app.use(pathPrefix + "/categories", CategoriesModule);
+app.use(pathPrefix + "/products", ProductsModule);
 
-// hello world
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});
+// // TODO: Remove below "routes"
+// // Modular routes
+// app.use('/category', routes.category);
+// app.use('/product', routes.product);
+// app.use('/user', routes.user);
+// app.use('/cart', routes.cart);
 
-app.listen(port, () =>
-  console.log(`Express server currently running on port ${port}`)
-);
+app.listen(config.port, logger.info(`Server is listening on port ${config.port}`));
