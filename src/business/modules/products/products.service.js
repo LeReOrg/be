@@ -26,5 +26,42 @@ export class ProductsService {
     return this.#productsRepository.save(product);
   };
 
-  getById = productId => this.#productsRepository.getByIdOrThrowError(productId);
+  getByIdOrThrowError = (productId) => {
+    return this.#productsRepository.getByIdOrThrowError(productId);
+  };
+
+  get = ({
+    categoryIds,
+    cities,
+    price,
+    page,
+    limit,
+    sort,
+  }) => {
+    const rangePrice = price && price.split("-");
+
+    const customSort = {};
+    if (sort) sort.split(",").forEach(item => {
+      // This statement to handle this case: sort="price:asc,"
+      if (item) {
+        const fieldValuePair = item.toLowerCase().split(":");
+        const field = fieldValuePair[0];
+        const value = fieldValuePair[1];
+        customSort[field] = value;
+      }
+    });
+
+    return this.#productsRepository.get(
+      {
+        categoryIds,
+        cities: cities && cities.split(","),
+        fromPrice: price && rangePrice[0],
+        toPrice: price && rangePrice[1],
+      }, {
+        page,
+        limit,
+        sort: customSort,
+      }
+    );
+  };
 };
