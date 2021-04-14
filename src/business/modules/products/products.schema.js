@@ -1,7 +1,8 @@
 import Joi from "joi";
+import paginationSchema from "../../../share/joi-schemas/pagination.schema";
 Joi.objectId = require('joi-objectid')(Joi);
 
-const createProductSchema = Joi.object({
+export const createProductSchema = Joi.object({
   name: Joi.string()
     .required()
     .trim(),
@@ -75,8 +76,16 @@ const createProductSchema = Joi.object({
   }).required(),
 });
 
-const validationShema = {
-  createProductSchema,
-};
+export const getProductsSchema = Joi.object().keys({
+  ...paginationSchema,
 
-export default validationShema;
+  price: Joi.string()
+    .optional(),
+
+  cities: Joi.string()
+    .optional(),
+
+  sort: Joi.string()
+    .optional()
+    .lowercase(),
+});

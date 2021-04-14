@@ -7,6 +7,7 @@ const controller = new Controller();
 
 router.get("/", wrap(controller.get));
 router.post("/", wrap(controller.create));
+router.get("/:categoryId", wrap(controller.getByIdOrThrowError));
 router.patch("/:categoryId", wrap(controller.update));
 router.get("/:categoryId/products", wrap(controller.getProductsByCategoryId));
 

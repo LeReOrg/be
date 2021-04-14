@@ -26,19 +26,37 @@ export class ProductsRepository {
     return document;
   };
 
-  getAll = (
+  get = (
     filter = {
       categoryIds: [],
+      cities: [], // ["District 1", "District 2"]
+      // fromPrice: 10
+      // toPrice: 20
     },
     options = {
       page: 1,
       limit: 10,
+      // sort: {price: "asc", quanlity: "desc"},
     }
   ) => {
     const conditions = {};
-    if (filter && Array.isArray(filter.categoryIds) && filter.categoryIds.length) {
-      conditions.categoryId = { $in: filter.categoryIds };
+
+    if (filter) {
+      const { categoryIds, cities, fromPrice, toPrice } = filter;
+
+      if (Array.isArray(categoryIds) && categoryIds.length) {
+        conditions["categoryId"] = { $in: categoryIds };
+      }
+      if (Array.isArray(cities) && cities.length) {
+        conditions["location.city"] = { $in: cities };
+      }
+      if (fromPrice || toPrice) {
+        const fromPriceCondition = fromPrice && { $gte: fromPrice };
+        const toPriceCondition = toPrice && { $lte: toPrice };
+        conditions["price"] = { ...fromPriceCondition, ...toPriceCondition };
+      }
     }
+
     return Product.paginate(conditions, options);
   };
 };

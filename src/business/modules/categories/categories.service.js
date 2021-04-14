@@ -1,15 +1,15 @@
 import { CategoriesRepository } from "./categories.repository";
-import { ProductsRepository } from "../products/products.repository";
+import { ProductsService } from "../products/products.service";
 import { CloudinaryService } from "../../../share/modules/cloudinary/cloudinary.service";
 
 export class CategoriesService {
   #categoriesRepository;
-  #productsRepository;
+  #productsService;
   #cloudinaryService;
 
   constructor() {
     this.#categoriesRepository = new CategoriesRepository();
-    this.#productsRepository = new ProductsRepository();
+    this.#productsService = new ProductsService();
     this.#cloudinaryService = new CloudinaryService();
   }
 
@@ -19,8 +19,6 @@ export class CategoriesService {
       publicId,
     });
   };
-
-  get = () => this.#categoriesRepository.getAll();
 
   create = async (data) => {
     const thumbnail = await this.uploadCategoryImage(data.thumbnail);
@@ -45,8 +43,15 @@ export class CategoriesService {
     return this.#categoriesRepository.save(category);
   };
 
-  getProductsByCategoryId = async (id, options) => {
-    await this.#categoriesRepository.getByIdOrThrowError(id);
-    return this.#productsRepository.getAll({ categoryIds: [id] }, options);
+  get = () => {
+    return this.#categoriesRepository.getAll();
+  };
+
+  getByIdOrThrowError = (categoryId) => {
+    return this.#categoriesRepository.getByIdOrThrowError(categoryId);
+  };
+
+  getProductsByCategoryId = (categoryId, filterAndOptions) => {
+    return this.#productsService.get({ categoryIds: [categoryId], ...filterAndOptions });
   };
 };

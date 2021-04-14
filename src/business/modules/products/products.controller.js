@@ -1,5 +1,5 @@
-import validationSchema from "./validation-schema";
 import { ProductsService } from "./products.service";
+import { createProductSchema, getProductsSchema } from "./products.schema";
 
 export class ProductsController {
   #productsService;
@@ -9,9 +9,16 @@ export class ProductsController {
   }
 
   create = async ({ reqBody }) => {
-    const data = await validationSchema.createProductSchema.validateAsync(reqBody);
+    const data = await createProductSchema.validateAsync(reqBody);
     return this.#productsService.create(data);
   };
 
-  getById = ({ reqParams }) => this.#productsService.getById(reqParams.productId);
+  getByIdOrThrowError = ({ reqParams }) => {
+    return this.#productsService.getByIdOrThrowError(reqParams.productId);
+  };
+
+  get = async ({ reqQuery }) => {
+    const input = await getProductsSchema.validateAsync(reqQuery);
+    return this.#productsService.get(input);
+  };
 };
