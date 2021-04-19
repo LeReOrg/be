@@ -50,6 +50,7 @@ export class ProductsService {
     categoryIds,
     cities,
     price,
+    isTopProduct,
     page,
     limit,
     sort,
@@ -60,7 +61,7 @@ export class ProductsService {
     if (sort) sort.split(",").forEach(item => {
       // This statement to handle this case: sort="price:asc,"
       if (item) {
-        const fieldValuePair = item.toLowerCase().split(":");
+        const fieldValuePair = item.split(":");
         const field = fieldValuePair[0];
         const value = fieldValuePair[1];
         customSort[field] = value;
@@ -73,6 +74,7 @@ export class ProductsService {
         cities: cities && cities.split(","),
         fromPrice: price && rangePrice[0],
         toPrice: price && rangePrice[1],
+        isTopProduct,
       }, {
         page,
         limit,

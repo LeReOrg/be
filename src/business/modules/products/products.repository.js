@@ -43,7 +43,7 @@ export class ProductsRepository {
     const conditions = {};
 
     if (filter) {
-      const { categoryIds, cities, fromPrice, toPrice } = filter;
+      const { categoryIds, cities, fromPrice, toPrice, isTopProduct } = filter;
 
       if (Array.isArray(categoryIds) && categoryIds.length) {
         conditions["categoryId"] = { $in: categoryIds };
@@ -56,8 +56,22 @@ export class ProductsRepository {
         const toPriceCondition = toPrice && { $lte: toPrice };
         conditions["price"] = { ...fromPriceCondition, ...toPriceCondition };
       }
+      if (typeof isTopProduct === "boolean") {
+        if (isTopProduct) {
+          conditions["isTopProduct"] = true;
+        } else {
+          conditions["isTopProduct"] = { $not: { $eq: true } };
+        }
+      }
     }
 
-    return Product.paginate(conditions, options);
+    console.log(options)
+
+    return Product.paginate(conditions, {
+      ...options,
+      projection: {
+        "images": { $slice: 1 },
+      },
+    });
   };
 };

@@ -99,7 +99,9 @@ export const getProductsSchema = Joi.object().keys({
   cities: Joi.string()
     .optional(),
 
+  isTopProduct: Joi.boolean()
+    .optional(),
+
   sort: Joi.string()
-    .optional()
-    .lowercase(),
+    .optional(),
 });

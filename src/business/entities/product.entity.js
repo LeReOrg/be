@@ -35,6 +35,7 @@ const schema = new Schema({
   }],
   isTopProduct: {
     type: Boolean,
+    default: false
   },
   categoryId: {
     type: Schema.Types.ObjectId,
