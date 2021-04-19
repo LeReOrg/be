@@ -35,6 +35,9 @@ export const createProductSchema = Joi.object({
     })
   ),
 
+  isTopProduct: Joi.boolean()
+    .optional(),
+
   categoryId: Joi.objectId()
     .required(),
 
@@ -46,14 +49,25 @@ export const createProductSchema = Joi.object({
     .required()
     .trim(),
 
-  images: Joi.array(),
-    // .required()
-    // .min(1)
-    // .items(
-    //   Joi.string()
-    //     .dataUri()
-    //     .trim(),
-    // ),
+  images: Joi.array()
+    .required()
+    .min(1)
+    .items(
+      Joi.string()
+        .dataUri()
+        .trim(),
+
+      Joi.object()
+        .keys({
+          base64: Joi.string()
+            .required()
+            .dataUri()
+            .trim(),
+
+          isLandingImage: Joi.boolean()
+            .optional(),
+        }),
+    ),
 
   location: Joi.object({
     latitude: Joi.number()

@@ -13,15 +13,8 @@ export class CategoriesService {
     this.#cloudinaryService = new CloudinaryService();
   }
 
-  uploadCategoryImage = (base64, publicId) => {
-    return this.#cloudinaryService.uploadBase64(base64, {
-      folder: "Categories",
-      publicId,
-    });
-  };
-
   create = async (data) => {
-    const thumbnail = await this.uploadCategoryImage(data.thumbnail);
+    const thumbnail = await this.#cloudinaryService.uploadCategoryImage(data.thumbnail);
     const payload = this.#categoriesRepository.construct({
       name: data.name,
       thumbnail,
@@ -35,7 +28,7 @@ export class CategoriesService {
       category.name = data.name;
     }
     if (data.thumbnail) {
-      category.thumbnail = await this.uploadCategoryImage(
+      category.thumbnail = await this.#cloudinaryService.uploadCategoryImage(
         data.thumbnail,
         category.thumbnail.publicId,
       );

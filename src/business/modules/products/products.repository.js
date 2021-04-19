@@ -10,6 +10,7 @@ export class ProductsRepository {
     depositPrice: data.depositPrice,
     shortestHiredDays: data.shortestHiredDays,
     discounts: data.discounts,
+    isTopProduct: data.isTopProduct,
     categoryId: data.categoryId,
     location: data.location,
   }));
