@@ -13,17 +13,33 @@ export class ProductsService {
     this.#cloudinaryService = new CloudinaryService();
   }
 
-  // uploadProductImage = (base64, publicId, productId) => {
-  //   return this.#cloudinaryService.uploadBase64(base64, {
-  //     folder: `Products/${productId}`,
-  //     publicId,
-  //   });
-  // };
+  uploadProductImages = async (input, productId) => {
+    const images = await Promise.all(input.map(async (item, index) => {
+      let base64 = item;
+      let order = index + 1;
+      if (typeof item === "object") {
+        base64 = item.base64;
+        if (item.isLandingImage) {
+          order = 0;
+        }
+      }
+      const info = await this.#cloudinaryService.uploadProductImage(base64, productId);
+      return { ...info, order };
+    }));
+
+    images.sort((a, b) => a.order - b.order);
+
+    console.log(images)
+
+    return images;
+  };
 
   create = async (data) => {
     await this.#categoriesRepository.getByIdOrThrowError(data.categoryId);
     const product = this.#productsRepository.construct(data);
-    return this.#productsRepository.save(product);
+    product.images = await this.uploadProductImages(data.images, product.id);
+    await this.#productsRepository.save(product);
+    return product;
   };
 
   getByIdOrThrowError = (productId) => {

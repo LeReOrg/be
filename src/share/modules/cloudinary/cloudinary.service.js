@@ -23,4 +23,21 @@ export class CloudinaryService {
       url: result.secure_url,
     };
   };
+
+  removeImage = (publicId) => {
+    return cloudinary.uploader.destroy(publicId);
+  };
+
+  uploadCategoryImage = (base64, publicId) => {
+    return this.uploadBase64(base64, {
+      folder: "Categories",
+      publicId,
+    });
+  };
+
+  uploadProductImage = (base64, productId) => {
+    return this.uploadBase64(base64, {
+      folder: "Products/" + productId,
+    });
+  };
 };

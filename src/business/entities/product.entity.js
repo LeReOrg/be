@@ -33,6 +33,9 @@ const schema = new Schema({
       type: Number,
     },
   }],
+  isTopProduct: {
+    type: Boolean,
+  },
   categoryId: {
     type: Schema.Types.ObjectId,
     ref: CONSTANTS.collection.category.name,
@@ -45,7 +48,6 @@ const schema = new Schema({
     type: Schema.Types.ObjectId,
     ref: CONSTANTS.collection.brand.name,
   },
-  thumbnail: CloudinaryImage,
   images: [CloudinaryImage],
   location: {
     latitude: {
