@@ -11,6 +11,9 @@ export class ConfigModule {
       apiSecret: process.env.CLOUDINARY_API_SECRET,
       apiKey: process.env.CLOUDINARY_API_KEY,
     },
+    jwt: {
+      secretKey: process.env.JWT_SECRET_KEY,
+    },
   }
 
   static retrieveConfig(key) {
