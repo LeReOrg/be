@@ -2,9 +2,9 @@ import productsService from "./products.service";
 import { createProductSchema, getProductsSchema } from "./products.schema";
 
 class ProductsController {
-  create = async ({ reqBody }) => {
+  create = async ({ reqBody, requestedBy }) => {
     const data = await createProductSchema.validateAsync(reqBody);
-    return productsService.create(data);
+    return productsService.create(data, requestedBy);
   };
 
   getByIdOrThrowError = ({ reqParams }) => {

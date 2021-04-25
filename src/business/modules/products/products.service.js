@@ -22,10 +22,11 @@ class ProductsService {
     return images;
   };
 
-  create = async (data) => {
+  create = async (data, requestedBy) => {
     await categoriesRepository.getByIdOrThrowError(data.categoryId);
     const product = productsRepository.construct(data);
     product.images = await this.uploadProductImages(data.images, product.id);
+    product.ownerId = requestedBy.id;
     await productsRepository.save(product);
     return product;
   };

@@ -41,10 +41,6 @@ export const createProductSchema = Joi.object({
   categoryId: Joi.objectId()
     .required(),
 
-  ownerId: Joi.string()
-    .required()
-    .trim(),
-
   brandId: Joi.string()
     .required()
     .trim(),
