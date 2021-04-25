@@ -1,12 +1,13 @@
 import { Router } from "express";
+import authenticationController from "./authentication.controller";
 import wrap from "../../../share/helpers/wrapper";
-import { AuthenticationController as Controller } from "./authentication.controller";
+import AuthenticationMiddleware from "./authentication.middleware";
 
 const router = Router();
-const controller = new Controller();
 
-router.post("/firebase-login", wrap(controller.firebaseLogin));
-router.post("/register", wrap(controller.register));
-router.post("/login", wrap(controller.login));
+router.post("/firebase-login", wrap(authenticationController.firebaseLogin));
+router.post("/register", wrap(authenticationController.register));
+router.post("/login", wrap(authenticationController.login));
+router.get("/me", AuthenticationMiddleware, wrap(authenticationController.getLoggedInUserProfile))
 
 export default router;

@@ -34,6 +34,7 @@ const wrap = callback => async (req, res) => {
     if (req.body) request.reqBody = req.body;
     if (req.query) request.reqQuery = req.query;
     if (req.params) request.reqParams = req.params;
+    if (req.user) request.requestedBy = req.user;
 
     const result = await callback(request);
 

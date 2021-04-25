@@ -1,7 +1,7 @@
 import { Category } from "../../entities";
 import { NotFoundError } from "../../../share/errors";
 
-export class CategoriesRepository {
+class CategoriesRepository {
   construct = data => (new Category({
     name: data.name,
     thumbnail: data.thumbnail,
@@ -21,3 +21,9 @@ export class CategoriesRepository {
     return document;
   };
 };
+
+const categoriesRepository = new CategoriesRepository();
+
+Object.freeze(categoriesRepository);
+
+export default categoriesRepository;

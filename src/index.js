@@ -43,18 +43,17 @@ app.use(function(req, res, next) {
   next();
 });
 
-app.get('/health-check', (req, res) => res.send("OK"));
+app.get("/health-check", (req, res) => res.send("OK"));
 
 const pathPrefix = "/api/v1";
 app.use(pathPrefix + "/categories", CategoriesModule);
 app.use(pathPrefix + "/products", ProductsModule);
 app.use(pathPrefix + "/authentication", AuthenticationModule);
 
-// // TODO: Remove below "routes"
-// // Modular routes
-// app.use('/category', routes.category);
-// app.use('/product', routes.product);
-// app.use('/user', routes.user);
-// app.use('/cart', routes.cart);
+// app.use(function (err, req, res, next) {
+//   if (err.name === 'UnauthorizedError') {
+//     res.status(401).send('invalid token...');
+//   }
+// });
 
 app.listen(config.port, logger.info(`Server is listening on port ${config.port}`));

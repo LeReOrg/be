@@ -3,7 +3,7 @@ import { ConfigModule } from "../config/config.module";
 
 const cloudinary = cloudinaryLib.v2;
 
-export class CloudinaryService {
+class CloudinaryService {
   #folderPrefix = ConfigModule.retrieveConfig("env");
 
   uploadBase64 = async (base64, customOptions) => {
@@ -41,3 +41,9 @@ export class CloudinaryService {
     });
   };
 };
+
+const cloudinaryService = new CloudinaryService();
+
+Object.freeze(cloudinaryService);
+
+export default cloudinaryService;

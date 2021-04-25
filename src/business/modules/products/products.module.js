@@ -1,11 +1,11 @@
 import { Router } from "express";
 import wrap from "../../../share/helpers/wrapper";
-import { ProductsController as Controller } from "./products.controller";
+import productsController from "./products.controller";
 
 const router = Router();
-const controller = new Controller();
-router.get("/:productId", wrap(controller.getByIdOrThrowError));
-router.get("/", wrap(controller.get));
-router.post("/", wrap(controller.create));
+
+router.get("/:productId", wrap(productsController.getByIdOrThrowError));
+router.get("/", wrap(productsController.get));
+router.post("/", wrap(productsController.create));
 
 export default router;

@@ -1,7 +1,7 @@
 import { User } from "../../entities";
 import { NotFoundError } from "../../../share/errors";
 
-export class UsersRepository {
+class UsersRepository {
   upsertOne = (condition, data) => {
     return User.findOneAndUpdate(condition, data, {
       upsert: true,
@@ -27,3 +27,9 @@ export class UsersRepository {
     return data.save();
   };
 };
+
+const usersRepository = new UsersRepository();
+
+Object.freeze(usersRepository);
+
+export default usersRepository;

@@ -1,50 +1,46 @@
-import { CategoriesRepository } from "./categories.repository";
-import { ProductsService } from "../products/products.service";
-import { CloudinaryService } from "../../../share/modules/cloudinary/cloudinary.service";
+import categoriesRepository from "./categories.repository";
+import cloudinaryService from "../../../share/modules/cloudinary/cloudinary.service";
+import productsService from "../products/products.service";
 
-export class CategoriesService {
-  #categoriesRepository;
-  #productsService;
-  #cloudinaryService;
-
-  constructor() {
-    this.#categoriesRepository = new CategoriesRepository();
-    this.#productsService = new ProductsService();
-    this.#cloudinaryService = new CloudinaryService();
-  }
-
+class CategoriesService {
   create = async (data) => {
-    const thumbnail = await this.#cloudinaryService.uploadCategoryImage(data.thumbnail);
-    const payload = this.#categoriesRepository.construct({
+    const thumbnail = await cloudinaryService.uploadCategoryImage(data.thumbnail);
+    const payload = categoriesRepository.construct({
       name: data.name,
       thumbnail,
     });
-    return this.#categoriesRepository.save(payload);
+    return categoriesRepository.save(payload);
   };
 
   update = async (id, data) => {
-    const category = await this.#categoriesRepository.getByIdOrThrowError(id);
+    const category = await categoriesRepository.getByIdOrThrowError(id);
     if (data.name) {
       category.name = data.name;
     }
     if (data.thumbnail) {
-      category.thumbnail = await this.#cloudinaryService.uploadCategoryImage(
+      category.thumbnail = await cloudinaryService.uploadCategoryImage(
         data.thumbnail,
         category.thumbnail.publicId,
       );
     }
-    return this.#categoriesRepository.save(category);
+    return categoriesRepository.save(category);
   };
 
   get = () => {
-    return this.#categoriesRepository.getAll();
+    return categoriesRepository.getAll();
   };
 
   getByIdOrThrowError = (categoryId) => {
-    return this.#categoriesRepository.getByIdOrThrowError(categoryId);
+    return categoriesRepository.getByIdOrThrowError(categoryId);
   };
 
   getProductsByCategoryId = (categoryId, filterAndOptions) => {
-    return this.#productsService.get({ categoryIds: [categoryId], ...filterAndOptions });
+    return productsService.get({ categoryIds: [categoryId], ...filterAndOptions });
   };
 };
+
+const categoriesService = new CategoriesService();
+
+Object.freeze(categoriesService);
+
+export default categoriesService;

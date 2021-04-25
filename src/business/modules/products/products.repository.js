@@ -1,7 +1,7 @@
 import { Product } from "../../entities";
 import { NotFoundError } from "../../../share/errors";
 
-export class ProductsRepository {
+class ProductsRepository {
   construct = data => (new Product({
     name: data.name,
     price: data.price,
@@ -65,8 +65,6 @@ export class ProductsRepository {
       }
     }
 
-    console.log(options)
-
     return Product.paginate(conditions, {
       ...options,
       projection: {
@@ -75,3 +73,9 @@ export class ProductsRepository {
     });
   };
 };
+
+const productsRepository = new ProductsRepository();
+
+Object.freeze(productsRepository);
+
+export default productsRepository;

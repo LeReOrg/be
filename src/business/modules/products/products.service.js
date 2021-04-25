@@ -1,18 +1,8 @@
-import { ProductsRepository } from "./products.repository";
-import { CategoriesRepository } from "../categories/categories.repository";
-import { CloudinaryService } from "../../../share/modules/cloudinary/cloudinary.service";
+import productsRepository from "./products.repository";
+import categoriesRepository from "../categories/categories.repository";
+import cloudinaryService from "../../../share/modules/cloudinary/cloudinary.service";
 
-export class ProductsService {
-  #productsRepository;
-  #categoriesRepository;
-  #cloudinaryService;
-
-  constructor() {
-    this.#productsRepository = new ProductsRepository();
-    this.#categoriesRepository = new CategoriesRepository();
-    this.#cloudinaryService = new CloudinaryService();
-  }
-
+class ProductsService {
   uploadProductImages = async (input, productId) => {
     const images = await Promise.all(input.map(async (item, index) => {
       let base64 = item;
@@ -23,27 +13,25 @@ export class ProductsService {
           order = 0;
         }
       }
-      const info = await this.#cloudinaryService.uploadProductImage(base64, productId);
+      const info = await cloudinaryService.uploadProductImage(base64, productId);
       return { ...info, order };
     }));
 
     images.sort((a, b) => a.order - b.order);
 
-    console.log(images)
-
     return images;
   };
 
   create = async (data) => {
-    await this.#categoriesRepository.getByIdOrThrowError(data.categoryId);
-    const product = this.#productsRepository.construct(data);
+    await categoriesRepository.getByIdOrThrowError(data.categoryId);
+    const product = productsRepository.construct(data);
     product.images = await this.uploadProductImages(data.images, product.id);
-    await this.#productsRepository.save(product);
+    await productsRepository.save(product);
     return product;
   };
 
   getByIdOrThrowError = (productId) => {
-    return this.#productsRepository.getByIdOrThrowError(productId);
+    return productsRepository.getByIdOrThrowError(productId);
   };
 
   get = ({
@@ -68,7 +56,7 @@ export class ProductsService {
       }
     });
 
-    return this.#productsRepository.get(
+    return productsRepository.get(
       {
         categoryIds,
         cities: cities && cities.split(","),
@@ -83,3 +71,9 @@ export class ProductsService {
     );
   };
 };
+
+const productsService = new ProductsService();
+
+Object.freeze(productsService);
+
+export default productsService;

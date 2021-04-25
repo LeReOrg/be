@@ -1,14 +1,13 @@
 import { Router } from "express";
 import wrap from "../../../share/helpers/wrapper";
-import { CategoriesController as Controller } from "./categories.controller";
+import categoriesController from "./categories.controller";
 
 const router = Router();
-const controller = new Controller();
 
-router.get("/", wrap(controller.get));
-router.post("/", wrap(controller.create));
-router.get("/:categoryId", wrap(controller.getByIdOrThrowError));
-router.patch("/:categoryId", wrap(controller.update));
-router.get("/:categoryId/products", wrap(controller.getProductsByCategoryId));
+router.get("/", wrap(categoriesController.get));
+router.post("/", wrap(categoriesController.create));
+router.get("/:categoryId", wrap(categoriesController.getByIdOrThrowError));
+router.patch("/:categoryId", wrap(categoriesController.update));
+router.get("/:categoryId/products", wrap(categoriesController.getProductsByCategoryId));
 
 export default router;
