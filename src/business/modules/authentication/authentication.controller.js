@@ -3,6 +3,7 @@ import {
   firebaseLoginSchema,
   registerSchema,
   loginSchema,
+  selfChangePasswordSchema,
 } from "./authentication.schema";
 
 class AuthenticationController {
@@ -22,7 +23,14 @@ class AuthenticationController {
   };
 
   getLoggedInUserProfile = async ({ requestedBy }) => {
+    requestedBy.hash = undefined;
+    requestedBy.salt = undefined;
     return requestedBy;
+  };
+
+  selfChangePassword = async({ reqBody, requestedBy }) => {
+    const { password, newPassword } = await selfChangePasswordSchema.validateAsync(reqBody);
+    return authenticationService.selfChangePassword(password, newPassword, requestedBy);
   };
 };
 

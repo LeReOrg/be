@@ -1,5 +1,11 @@
 import Joi from "joi";
 
+const password = Joi.string()
+  .required()
+  .trim()
+  .min(8);
+  // .regex(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,}$/),
+
 export const firebaseLoginSchema = Joi.object().keys({
   email: Joi.string()
     .required(),
@@ -23,11 +29,7 @@ export const loginSchema = Joi.object().keys({
     .email()
     .trim(),
 
-  password: Joi.string()
-    .required()
-    .trim()
-    .min(8),
-    // .regex(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,}$/),
+  password,
 });
 
 export const registerSchema = loginSchema.keys({
@@ -38,4 +40,10 @@ export const registerSchema = loginSchema.keys({
   phoneNumber: Joi.string()
     .optional()
     .regex(/^\d+$/),
+});
+
+export const selfChangePasswordSchema = Joi.object().keys({
+  password,
+
+  newPassword: password,
 });

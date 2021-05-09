@@ -12,12 +12,12 @@ class AuthenticationService {
     this.#jwtSecretKey = jwtConfig.secretKey;
   };
 
-  createToken = (data) => {
+  #createToken = (data) => {
     const payload = { email: data.email };
     return jwt.sign(payload, this.#jwtSecretKey);
   };
 
-  validateAndDecodeToken = (token) => {
+  #validateAndDecodeToken = (token) => {
     try {
       const decoded = jwt.verify(token, this.#jwtSecretKey);
       return decoded;
@@ -27,40 +27,46 @@ class AuthenticationService {
   };
 
   getUserByToken = async (token) => {
-    const { email } = await this.validateAndDecodeToken(token);
-    return usersRepository.findOne({ email }, { hash: 0, salt: 0 });
+    const { email } = await this.#validateAndDecodeToken(token);
+    return usersRepository.findOne({ email });
   };
 
-  generateSalt = (length) => {
+  #generateSalt = (length) => {
     return crypto.randomBytes(Math.ceil(length / 2))
       .toString('hex')
       .slice(0, length);
   };
 
-  hashPassword = (password, salt) => {
+  #hashPassword = (password, salt) => {
     return crypto.createHmac("sha512", salt)
       .update(password)
       .digest("hex");
   };
 
-  isDuplicatedEmail = async (email) => {
+  #generateSaltAndHashPassword = async (password, saltRound = 16) => {
+    const salt = this.#generateSalt(saltRound);
+    const hash = await this.#hashPassword(password, salt);
+    return { salt, hash };
+  };
+
+  #isDuplicatedEmail = async (email) => {
     const user = await usersRepository.findOne({ email });
     return !!user;
   };
 
-  isMatchedPassword = (password, hash, salt) => {
-    const newHash = this.hashPassword(password, salt);
+  #isMatchedPassword = (password, hash, salt) => {
+    const newHash = this.#hashPassword(password, salt);
     return newHash === hash;
   };
 
-  extractAndValidateLoggingUser = async (email, password) => {
+  #extractAndValidateLoggingUser = async (email, password) => {
     const user = await usersRepository.findOne({ email });
 
     if (!user) {
       throw new BadRequestError("Invalid email");
     }
 
-    const isMatchedPassword = this.isMatchedPassword(
+    const isMatchedPassword = this.#isMatchedPassword(
       password,
       user.hash,
       user.salt,
@@ -78,19 +84,18 @@ class AuthenticationService {
 
   fireBaseLogin = async (data) => {
     const user = await usersRepository.upsertOne({ uid: data.uid }, data);
-    const token = this.createToken({ email: user.email });
+    const token = this.#createToken({ email: user.email });
     return { token, user };
   };
 
   register = async (email, password, others) => {
-    const isDuplicatedEmail = await this.isDuplicatedEmail(email);
+    const isDuplicatedEmail = await this.#isDuplicatedEmail(email);
 
     if (isDuplicatedEmail) {
       throw new BadRequestError("Duplicated Email");
     }
 
-    const salt = this.generateSalt(16);
-    const hash = await this.hashPassword(password);
+    const { salt, hash } = await this.#generateSaltAndHashPassword(password);
 
     const user = usersRepository.constructManualAuthenticationData({
       ...others,
@@ -106,8 +111,8 @@ class AuthenticationService {
 
   login = async (email, password) => {
     try {
-      const user = await this.extractAndValidateLoggingUser(email, password);
-      const token = this.createToken({ email: user.email });
+      const user = await this.#extractAndValidateLoggingUser(email, password);
+      const token = this.#createToken({ email: user.email });
       return { token, user };
     } catch (error) {
       if (error instanceof BadRequestError) {
@@ -115,6 +120,28 @@ class AuthenticationService {
       }
       throw new BadRequestError("Login fail");
     }
+  };
+
+  selfChangePassword = async (password, newPassword, requestedBy) => {
+    const user = requestedBy;
+
+    const isMatchedPassword = this.#isMatchedPassword(
+      password,
+      user.hash,
+      user.salt,
+    );
+
+    if (!isMatchedPassword) {
+      throw new BadRequestError("Invalid password");
+    }
+
+    const { salt, hash } = await this.#generateSaltAndHashPassword(newPassword);
+
+    user.salt = salt;
+    user.hash = hash;
+    await usersRepository.save(user);
+
+    return { status: "OK" };
   };
 };
 

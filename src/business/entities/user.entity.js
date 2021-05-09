@@ -1,7 +1,8 @@
 import { Schema, model } from "mongoose";
 import CONSTANTS from "./constants";
+import mongoosePaginate from "mongoose-paginate-v2";
 
-const User = model(CONSTANTS.collection.user.name, new Schema({
+const schema = new Schema({
   uid: {
     type: String,
     index: {
@@ -33,6 +34,10 @@ const User = model(CONSTANTS.collection.user.name, new Schema({
   },
 }, {
   timestamps: true,
-}));
+});
+
+schema.plugin(mongoosePaginate);
+
+const User = model(CONSTANTS.collection.user.name, schema);
 
 export default User;

@@ -6,6 +6,7 @@ import { CloudinaryModule } from "./share/modules/cloudinary/cloudinary.module";
 import CategoriesModule from "./business/modules/categories/categories.module";
 import ProductsModule from "./business/modules/products/products.module";
 import AuthenticationModule from "./business/modules/authentication/authentication.module";
+import UsersModule from "./business/modules/users/users.module";
 
 // // TODO: remove 3 lines below
 // import cors from "cors";
@@ -49,6 +50,7 @@ const pathPrefix = "/api/v1";
 app.use(pathPrefix + "/categories", CategoriesModule);
 app.use(pathPrefix + "/products", ProductsModule);
 app.use(pathPrefix + "/authentication", AuthenticationModule);
+app.use(pathPrefix + "/users", UsersModule);
 
 // app.use(function (err, req, res, next) {
 //   if (err.name === 'UnauthorizedError') {

@@ -26,6 +26,25 @@ class UsersRepository {
   save = (data) => {
     return data.save();
   };
+
+  get = (
+    filter = {},
+    options = {
+      page: 1,
+      limit: 10,
+      // sort: {price: "asc", quanlity: "desc"},
+    }
+  ) => {
+    const conditions = {};
+
+    return User.paginate(conditions, {
+      ...options,
+      select: {
+        hash: 0,
+        salt: 0,
+      },
+    });
+  };
 };
 
 const usersRepository = new UsersRepository();
