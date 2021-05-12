@@ -13,6 +13,12 @@ export class ConfigModule {
     },
     jwt: {
       secretKey: process.env.JWT_SECRET_KEY,
+      otpSecretKey: process.env.JWT_OTP_SECRET_KEY,
+    },
+    mail: {
+      service: process.env.MAIL_SERVICE,
+      username: process.env.MAIL_USERNAME,
+      password: process.env.MAIL_PASSWORD,
     },
   }
 

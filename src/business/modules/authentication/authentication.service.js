@@ -3,31 +3,38 @@ import { BadRequestError } from "../../../share/errors";
 import usersRepository from "../users/users.repository";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import emailNotifier from "../../../share/modules/notifier/email-notifier.module";
+import { generateRandomString } from "../../../share/helpers/utils";
 
 class AuthenticationService {
   #jwtSecretKey;
+  #jwtOtpSecretKey;
 
   constructor() {
     const jwtConfig = ConfigModule.retrieveConfig("jwt");
     this.#jwtSecretKey = jwtConfig.secretKey;
+    this.#jwtOtpSecretKey = jwtConfig.otpSecretKey;
   };
 
-  #createToken = (data) => {
+  #createToken = (data, secretKey = this.#jwtSecretKey, options = {}) => {
     const payload = { email: data.email };
-    return jwt.sign(payload, this.#jwtSecretKey);
+    return jwt.sign(payload, secretKey, { ...options });
   };
 
-  #validateAndDecodeToken = (token) => {
+  #validateAndDecodeToken = (token, secretKey = this.#jwtSecretKey) => {
     try {
-      const decoded = jwt.verify(token, this.#jwtSecretKey);
+      const decoded = jwt.verify(token, secretKey);
       return decoded;
     } catch (err) {
       throw new BadRequestError("Invalid token");
     }
   };
 
-  getUserByToken = async (token) => {
-    const { email } = await this.#validateAndDecodeToken(token);
+  getUserByToken = async (token, isOtpToken = false) => {
+    const { email } = await this.#validateAndDecodeToken(
+      token,
+      isOtpToken ? this.#jwtOtpSecretKey : this.#jwtSecretKey
+    );
     return usersRepository.findOne({ email });
   };
 
@@ -76,15 +83,18 @@ class AuthenticationService {
       throw new BadRequestError("Invalid password");
     }
 
-    user.hash = undefined;
-    user.salt = undefined;
-
     return user;
   };
 
   fireBaseLogin = async (data) => {
     const user = await usersRepository.upsertOne({ uid: data.uid }, data);
+
+    user.hash = undefined;
+    user.salt = undefined;
+    user.resetPasswordOtpCode = undefined;
+
     const token = this.#createToken({ email: user.email });
+
     return { token, user };
   };
 
@@ -112,8 +122,15 @@ class AuthenticationService {
   login = async (email, password) => {
     try {
       const user = await this.#extractAndValidateLoggingUser(email, password);
+
+      user.hash = undefined;
+      user.salt = undefined;
+      user.resetPasswordOtpCode = undefined;
+
       const token = this.#createToken({ email: user.email });
+      
       return { token, user };
+
     } catch (error) {
       if (error instanceof BadRequestError) {
         throw error;
@@ -139,6 +156,63 @@ class AuthenticationService {
 
     user.salt = salt;
     user.hash = hash;
+    await usersRepository.save(user);
+
+    return { status: "OK" };
+  };
+
+  #generateOtpCode = (length) => {
+    let code;
+    do {
+      code = generateRandomString(length, { includeAlphabet: false });
+    } while(
+      typeof code != "string" || (
+        typeof code == "string" && code.charAt(0) == "0"
+      )
+    );
+    return code;
+  };
+
+  sendForgotPasswordEmail = async (email) => {
+    const otpCode = this.#generateOtpCode(6);
+
+    const otpToken = this.#createToken(
+      { email },
+      this.#jwtOtpSecretKey,
+      { expiresIn: 5 * 60 }
+    );
+
+    await emailNotifier.sendForgotPasswordEmail(email, otpCode);
+
+    const user = await usersRepository.findOne({ email });
+
+    if (!user) {
+      return { token: otpToken };
+    }
+
+    user.resetPasswordOtpCode = otpCode;
+
+    await usersRepository.save(user);
+
+    return { token: otpToken };
+  };
+
+  verifyOtpCode = async (otpCode, user) => {
+    const isValidOtpCode = user && otpCode === user.resetPasswordOtpCode;
+
+    if (!isValidOtpCode) {
+      throw new BadRequestError("INVALID_OTP");
+    }
+
+    return { status: "OK" };
+  };
+
+  resetPassword = async (password, user) => {
+    const { salt, hash } = await this.#generateSaltAndHashPassword(password);
+
+    user.salt = salt;
+    user.hash = hash;
+    user.resetPasswordOtpCode = undefined;
     await usersRepository.save(user);
 
     return { status: "OK" };

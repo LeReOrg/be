@@ -23,6 +23,10 @@ class UsersService {
       sort: customSort,
     });
   };
+
+  updateProfile = async (input, requestedBy) => {
+    return usersRepository.findByIdAndUpdate(requestedBy.id, input);
+  };
 };
 
 const usersService = new UsersService();

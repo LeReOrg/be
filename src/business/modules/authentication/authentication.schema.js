@@ -1,10 +1,15 @@
 import Joi from "joi";
 
+const email = Joi.string()
+  .required()
+  .email()
+  .trim();
+
 const password = Joi.string()
   .required()
   .trim()
   .min(8);
-  // .regex(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,}$/),
+  // .regex(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,}$/);
 
 export const firebaseLoginSchema = Joi.object().keys({
   email: Joi.string()
@@ -24,10 +29,7 @@ export const firebaseLoginSchema = Joi.object().keys({
 });
 
 export const loginSchema = Joi.object().keys({
-  email: Joi.string()
-    .required()
-    .email()
-    .trim(),
+  email,
 
   password,
 });
@@ -46,4 +48,18 @@ export const selfChangePasswordSchema = Joi.object().keys({
   password,
 
   newPassword: password,
+});
+
+export const sendForgotPasswordEmailSchema = Joi.object().keys({
+  email,
+});
+
+export const verfiyOtpCodeSchema = Joi.object().keys({
+  otpCode: Joi.string()
+    .required()
+    .length(6)
+});
+
+export const resetPasswordSchema = Joi.object().keys({
+  password,
 });

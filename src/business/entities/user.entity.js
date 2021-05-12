@@ -32,6 +32,18 @@ const schema = new Schema({
   avatar: {
     type: String,
   },
+  resetPasswordOtpCode: {
+    type: String,
+  },
+  gender: {
+    type: String,
+  },
+  birthDay: {
+    type: Date,
+  },
+  isHirer: {
+    type: Boolean,
+  },
 }, {
   timestamps: true,
 });

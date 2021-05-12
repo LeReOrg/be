@@ -42,7 +42,24 @@ class UsersRepository {
       select: {
         hash: 0,
         salt: 0,
+        resetPasswordOtpCode: 0,
       },
+    });
+  };
+
+  findByIdAndUpdate = (id, data, customOptions) => {
+    const defaultOptions = {
+      new: true,
+      fields: {
+        hash: 0,
+        salt: 0,
+        resetPasswordOtpCode: 0,
+      },
+    };
+
+    return User.findByIdAndUpdate(id, data, {
+      ...defaultOptions,
+      ...customOptions
     });
   };
 };

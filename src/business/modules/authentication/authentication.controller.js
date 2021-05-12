@@ -4,6 +4,9 @@ import {
   registerSchema,
   loginSchema,
   selfChangePasswordSchema,
+  sendForgotPasswordEmailSchema,
+  verfiyOtpCodeSchema,
+  resetPasswordSchema,
 } from "./authentication.schema";
 
 class AuthenticationController {
@@ -25,12 +28,28 @@ class AuthenticationController {
   getLoggedInUserProfile = async ({ requestedBy }) => {
     requestedBy.hash = undefined;
     requestedBy.salt = undefined;
+    requestedBy.resetPasswordOtpCode = undefined;
     return requestedBy;
   };
 
-  selfChangePassword = async({ reqBody, requestedBy }) => {
+  selfChangePassword = async ({ reqBody, requestedBy }) => {
     const { password, newPassword } = await selfChangePasswordSchema.validateAsync(reqBody);
     return authenticationService.selfChangePassword(password, newPassword, requestedBy);
+  };
+
+  sendForgotPasswordEmail = async ({ reqBody }) => {
+    const { email } = await sendForgotPasswordEmailSchema.validateAsync(reqBody);
+    return authenticationService.sendForgotPasswordEmail(email);
+  };
+
+  verifyOtpCode = async ({ reqBody, requestedBy }) => {
+    const { otpCode } = await verfiyOtpCodeSchema.validateAsync(reqBody);
+    return authenticationService.verifyOtpCode(otpCode, requestedBy);
+  }
+
+  resetPassword = async ({ reqBody, requestedBy }) => {
+    const { password } = await resetPasswordSchema.validateAsync(reqBody);
+    return authenticationService.resetPassword(password, requestedBy);
   };
 };
 
