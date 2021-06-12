@@ -28,8 +28,11 @@ async function bootstrap() {
   const env = config.get<string>("environment");
 
   if (env !== "Production") {
-    __initializeSwagger(app);
     mongoose.set("debug", true);
+
+    __initializeSwagger(app);
+
+    app.enableCors();
   }
 
   await app.listen(process.env.PORT || 3000);
