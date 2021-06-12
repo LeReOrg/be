@@ -1,5 +1,5 @@
 export default () => ({
-  environment: process.env.ENV,
+  environment: process.env.ENVIRONMENT,
   port: process.env.PORT ? parseInt(process.env.PORT, 10) : 3000,
   database: {
     mongodb: {

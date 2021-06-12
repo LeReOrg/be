@@ -5,6 +5,7 @@ import { DiscountDto } from "./discount.dto";
 import { LocationDto } from "./location.dto";
 import { UserDto } from "../../users/dtos/user.dto";
 import { CategoryDto } from "../../categories/dtos/category.dto";
+import { BreadcrumbDto } from "./breadcrumb.dto";
 
 @Exclude()
 export class ProductDto {
@@ -42,17 +43,16 @@ export class ProductDto {
 
   @Expose()
   @ApiResponseProperty()
-  breadcrumb: string;
+  term: string;
 
   @Expose()
-  @Type(() => CategoryDto)
-  @ApiResponseProperty({ type: CategoryDto })
-  category: CategoryDto;
+  @ApiResponseProperty()
+  requiredLicenses: string;
 
   @Expose()
-  @Type(() => UserDto)
-  @ApiResponseProperty({ type: UserDto })
-  user: UserDto;
+  @Type(() => BreadcrumbDto)
+  @ApiResponseProperty({ type: [BreadcrumbDto] })
+  breadcrumbs: BreadcrumbDto[];
 
   @Expose()
   @Type(() => LocationDto)
@@ -68,6 +68,16 @@ export class ProductDto {
   @Type(() => CloudinaryImageDto)
   @ApiResponseProperty({ type: [CloudinaryImageDto] })
   images: CloudinaryImageDto[];
+
+  @Expose()
+  @Type(() => CategoryDto)
+  @ApiResponseProperty({ type: CategoryDto })
+  category: CategoryDto;
+
+  @Expose()
+  @Type(() => UserDto)
+  @ApiResponseProperty({ type: UserDto })
+  user: UserDto;
 
   @Expose()
   @ApiResponseProperty({ example: "2021-06-02T07:53:00.865Z" })

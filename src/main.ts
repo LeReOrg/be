@@ -3,6 +3,7 @@ import { NestFactory } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
 import * as mongoose from "mongoose";
+import { ConfigService } from "@nestjs/config";
 
 const __initializeSwagger = (app: INestApplication): void => {
   const config = new DocumentBuilder()
@@ -23,9 +24,13 @@ async function bootstrap() {
   app.setGlobalPrefix("/api/v1");
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
-  __initializeSwagger(app);
+  const config = app.get(ConfigService);
+  const env = config.get<string>("environment");
 
-  mongoose.set("debug", true);
+  if (env !== "Production") {
+    __initializeSwagger(app);
+    mongoose.set("debug", true);
+  }
 
   await app.listen(process.env.PORT || 3000);
 }

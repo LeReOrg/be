@@ -7,60 +7,80 @@ import {
   IsBoolean,
   IsMongoId,
   IsNumber,
+  IsOptional,
   IsString,
   ValidateNested,
 } from "class-validator";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Transform, Type } from "class-transformer";
-
+import { BreadcrumbDto } from "./breadcrumb.dto";
 export class CreateProductDto {
+  @Type(() => String)
+  @Transform((param) => param.value.trim())
   @IsString()
   @ApiProperty()
   name: string;
 
+  @Type(() => Number)
   @IsNumber()
   @ApiProperty()
   price: number;
 
+  @Type(() => Number)
   @IsNumber()
   @ApiProperty()
   quantity: number;
 
+  @Type(() => String)
   @IsString()
   @ApiProperty()
   description: string;
 
-  @IsString()
+  @Type(() => Number)
+  @IsNumber()
   @ApiProperty()
   depositPrice: number;
 
+  @Type(() => Number)
   @IsNumber()
   @ApiProperty()
   shortestHiredDays: number;
 
+  @Type(() => Boolean)
   @IsBoolean()
   @ApiPropertyOptional()
   isTopProduct?: boolean;
 
+  @Type(() => String)
   @IsString()
-  @IsMongoId()
-  @ApiProperty()
-  categoryId: string;
+  @IsOptional()
+  @ApiPropertyOptional()
+  term?: string;
 
-  @ValidateNested()
+  @Type(() => String)
+  @IsString()
+  @IsOptional()
+  @ApiPropertyOptional()
+  requiredLicenses?: string;
+
+  @Type(() => BreadcrumbDto)
+  @ValidateNested({ each: true })
+  @IsOptional()
+  @IsArray()
+  @ApiPropertyOptional({ type: [BreadcrumbDto] })
+  breadcrumbs?: BreadcrumbDto[];
+
   @Type(() => LocationDto)
+  @ValidateNested()
   @ApiProperty({ type: LocationDto })
   location: LocationDto;
 
+  @Type(() => DiscountDto)
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => DiscountDto)
   @ApiPropertyOptional({ type: [DiscountDto] })
   discounts?: DiscountDto[];
 
-  @IsArray()
-  @ArrayMinSize(1)
-  @ValidateNested({ each: true })
   @Transform((params) =>
     params.value.map((value) => {
       if (typeof value === "string") {
@@ -69,6 +89,15 @@ export class CreateProductDto {
       return value;
     }),
   )
+  @ValidateNested({ each: true })
+  @IsArray()
+  @ArrayMinSize(1)
   @ApiProperty({ type: [UploadProductImageDto] })
   images: UploadProductImageDto[];
+
+  @Type(() => String)
+  @IsString()
+  @IsMongoId()
+  @ApiProperty()
+  categoryId: string;
 }

@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { ProductsRepository } from "./products.repository";
 import { CloudinaryService } from "../cloudinary/cloudinary.service";
 import { Product } from "./schemas/product.schema";
@@ -10,6 +10,9 @@ import { User } from "../users/schemas/user.schema";
 import { CategoriesRepository } from "../categories/categories.repository";
 import { CloudinaryImage } from "../cloudinary/schemas/cloudinary-image.schema";
 import { Discount } from "./schemas/discount.schema";
+import { Breadcrumb } from "./schemas/breadcrumb.schema";
+import { BreadcrumbDto } from "./dtos/breadcrumb.dto";
+import { Category } from "../categories/schemas/category.schema";
 
 @Injectable()
 export class ProductsService {
@@ -64,12 +67,57 @@ export class ProductsService {
     return deepClonedInput;
   }
 
+  private async __validateCreateProductInput(input: CreateProductDto) {
+    const setOfCategoryIds: Set<string> = new Set();
+
+    setOfCategoryIds.add(input.categoryId);
+
+    input.breadcrumbs?.forEach((breadcrumb) => {
+      if (breadcrumb.categoryId) {
+        setOfCategoryIds.add(breadcrumb.categoryId);
+      }
+    });
+
+    // No duplicated
+    const categoryIds = [...setOfCategoryIds];
+
+    const categories = await this.__categoriesRepository.findAll(
+      { _id: { $in: categoryIds } },
+      { _id: 1 },
+    );
+
+    if (categoryIds.length !== categories.length) {
+      throw new NotFoundException("Not found category");
+    }
+
+    return categories;
+  }
+
+  private __formatBreadcrumbsDtoToSchema(
+    input: BreadcrumbDto[],
+    categories: Category[],
+  ): Breadcrumb[] {
+    return input.map((breadcrumb) => {
+      const breadCrumbCategory = categories.find(
+        (category) => category.id === breadcrumb.categoryId,
+      );
+
+      const result: Breadcrumb = {
+        name: breadcrumb.name,
+        url: breadcrumb.url,
+        categoryId: breadCrumbCategory?._id,
+      };
+
+      return result;
+    });
+  }
+
   public async createProduct(input: CreateProductDto, user: User): Promise<Product> {
-    const category = await this.__categoriesRepository.findByIdOrThrowException(input.categoryId);
+    const categories = await this.__validateCreateProductInput(input);
 
-    const sortedDiscounts = this.__sortProductDiscounts(input.discounts || []);
+    const category = categories.find((category) => category.id === input.categoryId);
 
-    const product = await this.__productsRepository.createOne({
+    const payload: Partial<Product> = {
       name: input.name,
       price: input.price,
       quantity: input.quantity,
@@ -77,11 +125,21 @@ export class ProductsService {
       depositPrice: input.depositPrice,
       shortestHiredDays: input.shortestHiredDays,
       isTopProduct: input.isTopProduct,
-      discounts: sortedDiscounts,
+      term: input.term,
+      requiredLicenses: input.requiredLicenses,
       location: input.location,
       category,
       user,
-    });
+    };
+
+    if (input.breadcrumbs) {
+      payload.breadcrumbs = this.__formatBreadcrumbsDtoToSchema(input.breadcrumbs, categories);
+    }
+    if (input.discounts) {
+      payload.discounts = this.__sortProductDiscounts(input.discounts);
+    }
+
+    const product = await this.__productsRepository.createOne(payload);
 
     const images = await this.__uploadProductImages(input.images, product.id);
 

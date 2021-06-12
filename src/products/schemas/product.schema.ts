@@ -5,6 +5,7 @@ import { Discount } from "./discount.schema";
 import { Location } from "./location.schema";
 import { User } from "../../users/schemas/user.schema";
 import { Category } from "../../categories/schemas/category.schema";
+import { Breadcrumb } from "./breadcrumb.schema";
 
 @Schema({ timestamps: true })
 export class Product {
@@ -33,14 +34,14 @@ export class Product {
   @Prop({ default: false })
   isTopProduct: boolean;
 
-  @Prop()
-  breadcrumb: string;
+  @Prop({ required: false })
+  term: string;
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: "User" })
-  user: User;
+  @Prop({ required: false })
+  requiredLicenses: string;
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: "Category" })
-  category: Category;
+  @Prop({ required: false })
+  breadcrumbs: Breadcrumb[];
 
   @Prop()
   location: Location;
@@ -50,6 +51,12 @@ export class Product {
 
   @Prop()
   images: CloudinaryImage[];
+
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: "Category" })
+  category: Category;
+
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: "User" })
+  user: User;
 }
 
 export type ProductDocument = Product & Document;
