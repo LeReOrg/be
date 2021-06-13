@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query, Request, UseGuards } from "@nestjs/common";
 import { ProductsService } from "./products.service";
 import { ApiBearerAuth, ApiExtraModels, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { ProductDto } from "./dtos/product.dto";
@@ -23,6 +23,16 @@ export class ProductsController {
   public async fetchAll(@Query() input: PaginatedProductsRequestDto) {
     const result = await this.__productsService.fetchAll(input);
     return plainToClassFromExist(new PaginatedDto<ProductDto>(ProductDto), result);
+  }
+
+  @Get("/:id")
+  @ApiOperation({ summary: "Find product detail by id" })
+  @ApiResponse({ status: 200, type: ProductDto })
+  @ApiResponse({ status: 404, description: "Not Found Product" })
+  @ApiResponse({ status: 500, description: "Unexpected error happen" })
+  public async findProductDetailById(@Param("id") id: string): Promise<ProductDto> {
+    const result = await this.__productsService.findProductDetailById(id);
+    return plainToClass(ProductDto, result);
   }
 
   @Post()

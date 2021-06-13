@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { BaseRepository } from "../common/repositories/base.repository";
 import { Product, ProductDocument } from "./schemas/product.schema";
@@ -58,5 +58,15 @@ export class ProductsRepository extends BaseRepository<ProductDocument> {
         images: { $slice: 1 },
       },
     });
+  }
+
+  public async findProductDetailById(id: string): Promise<Product> {
+    const doc = await this.__productModel.findById(id).populate("category").populate("user");
+
+    if (!doc) {
+      throw new NotFoundException("Not Found Product");
+    }
+
+    return doc;
   }
 }

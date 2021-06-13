@@ -97,7 +97,7 @@ export class OrdersService {
     return products;
   }
 
-  public async createOrders(input: CreateOrderDto[], lessee: User) {
+  public async createOrders(input: CreateOrderDto[], lessee: User): Promise<Order[]> {
     const products = await this.__validateCreateOrdersInput(input);
 
     const orders: Partial<Order>[] = [];
@@ -145,5 +145,37 @@ export class OrdersService {
     }
 
     return this.__ordersRepository.createMany(orders);
+  }
+
+  private __validateOnSetOrderStatus(currentStatus: string, newStatus: string): void {
+    if (
+      !currentStatus ||
+      !newStatus ||
+      (newStatus === OrderStatus.PickingUp && currentStatus !== OrderStatus.PendingConfirm) ||
+      (newStatus === OrderStatus.Delivering && currentStatus !== OrderStatus.PickingUp) ||
+      (newStatus === OrderStatus.Delivered && currentStatus !== OrderStatus.Delivering) ||
+      (newStatus === OrderStatus.PendingReturn && currentStatus !== OrderStatus.Delivered) ||
+      (newStatus === OrderStatus.Returning && currentStatus !== OrderStatus.PendingReturn) ||
+      (newStatus === OrderStatus.Returned && currentStatus !== OrderStatus.Returning) ||
+      // Only allow cancel the order before delivery
+      (newStatus === OrderStatus.Cancelled && currentStatus !== OrderStatus.PendingConfirm) ||
+      (newStatus === OrderStatus.Cancelled && currentStatus !== OrderStatus.PickingUp)
+    ) {
+      throw new Error("Invalid Status");
+    }
+  }
+
+  public async updateOrder(id: string, input: any) {
+    const order = await this.__ordersRepository.findByIdOrThrowException(id);
+
+    const payload: Partial<Order> = {};
+
+    if (input.quantity) {
+      payload.quantity = input.quantity;
+    }
+    if (input.status) {
+      this.__validateOnSetOrderStatus(order.status, input.status.toUpperCase());
+      payload.status = input.status;
+    }
   }
 }

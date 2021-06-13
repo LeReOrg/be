@@ -37,6 +37,10 @@ export class ProductsService {
     );
   }
 
+  public async findProductDetailById(id: string): Promise<Product> {
+    return this.__productsRepository.findProductDetailById(id);
+  }
+
   private async __uploadProductImages(
     input: UploadProductImageDto[],
     productId: string,
@@ -138,11 +142,11 @@ export class ProductsService {
     if (input.discounts) {
       payload.discounts = this.__sortProductDiscounts(input.discounts);
     }
-
+    console.log("run 1");
     const product = await this.__productsRepository.createOne(payload);
-
+    console.log("run 2");
     const images = await this.__uploadProductImages(input.images, product.id);
-
+    console.log("run 3");
     return this.__productsRepository.findByIdAndUpdate(product.id, { images });
   }
 }
