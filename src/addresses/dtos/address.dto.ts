@@ -8,11 +8,6 @@ export class AddressDto {
   _id: string;
 
   @Expose()
-  @Type(() => String)
-  @ApiProperty()
-  type: string;
-
-  @Expose()
   @Type(() => Number)
   @ApiProperty({ required: false })
   latitude?: number;
@@ -41,4 +36,12 @@ export class AddressDto {
   @Type(() => String)
   @ApiProperty()
   province: string;
+
+  @Expose()
+  @ApiProperty()
+  createdAt: Date;
+
+  @Expose()
+  @ApiProperty()
+  updatedAt: Date;
 }

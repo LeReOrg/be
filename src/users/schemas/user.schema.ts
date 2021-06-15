@@ -7,7 +7,7 @@ export class User {
 
   id: string;
 
-  @Prop({ index: { unique: true } })
+  @Prop()
   uid: string;
 
   @Prop({ unique: true, required: true })

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { ProductsRepository } from "./products.repository";
 import { CloudinaryService } from "../cloudinary/cloudinary.service";
 import { Product } from "./schemas/product.schema";
@@ -205,7 +205,15 @@ export class ProductsService {
       payload.discounts = this.__sortProductDiscounts(input.discounts);
     }
     if (input.address) {
-      payload.address = await this.__addressesService.createProductAddress(input.address);
+      payload.address = await this.__addressesService.createProductAddress(input.address, user);
+    } else {
+      const userAddress = await this.__addressesRepository.findOne({ user, isPickupAddress: true });
+
+      if (!userAddress) {
+        throw new BadRequestException("Missing User Pickup Address");
+      }
+
+      payload.address = userAddress;
     }
 
     const product = await this.__productsRepository.createOne(payload);

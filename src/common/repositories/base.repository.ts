@@ -26,7 +26,7 @@ export class BaseRepository<T extends Document> {
   public async findAll(
     filter: FilterQuery<T> = {},
     projection?: any | null,
-    options?: QueryOptions | null,
+    options?: BaseQueryOptions | null,
   ): Promise<T[]> {
     return this.__model.find(filter, projection, options);
   }

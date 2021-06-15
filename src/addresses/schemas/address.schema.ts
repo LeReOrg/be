@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document, Schema as MongooseSchema } from "mongoose";
-import { AddressType } from "../enum/address-type";
-// import { User } from "../../users/schemas/user.schema";
+import { User } from "../../users/schemas/user.schema";
 // import { Product } from "../../products/schemas/product.schema";
 
 @Schema({ timestamps: true })
@@ -9,15 +8,6 @@ export class Address {
   _id: MongooseSchema.Types.ObjectId;
 
   id: string;
-
-  // @Prop({ type: MongooseSchema.Types.ObjectId, ref: "User" })
-  // user: User;
-
-  // @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: "Product" }] })
-  // products: Product[];
-
-  @Prop({ required: true, enum: AddressType })
-  type: string;
 
   @Prop({ required: false })
   latitude?: number;
@@ -37,11 +27,20 @@ export class Address {
   @Prop({ required: true })
   province: string;
 
-  // @Prop({ required: true, enum: AddressStatus })
-  // status: string;
+  @Prop({ required: false })
+  isDefaultAddress?: boolean;
 
-  // @Prop()
-  // isDefault: boolean;
+  @Prop({ required: false })
+  isPickupAddress?: boolean;
+
+  @Prop({ required: false })
+  isShippingAddress?: boolean;
+
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: "User" })
+  user: User;
+
+  // @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: "Product" }] })
+  // products: Product[];
 }
 
 export type AddressDocument = Address & Document;

@@ -4,6 +4,7 @@ import { MongooseModule } from "@nestjs/mongoose";
 import { Address, AddressSchema } from "./schemas/address.schema";
 import { AddressesRepository } from "./addresses.repository";
 import { AddressesService } from "./addresses.service";
+import { UserAddressesController } from "./user-addresses.controller";
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { AddressesService } from "./addresses.service";
       },
     ]),
   ],
-  controllers: [],
+  controllers: [UserAddressesController],
   providers: [AddressesRepository, AddressesService],
   exports: [
     MongooseModule.forFeatureAsync([

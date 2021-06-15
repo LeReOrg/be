@@ -24,6 +24,7 @@ import { plainToClass, plainToClassFromExist } from "class-transformer";
 import { JwtAuthGuard } from "../authentication/guards/jwt.guard";
 import { CreateOrderDto } from "./dtos/create-order.dto";
 import { OrderDto } from "./dtos/order.dto";
+import { CreateOrdersDto } from "./dtos/create-orders.dto";
 
 @Controller("/orders")
 @ApiTags("Orders")
@@ -34,7 +35,6 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: "Place many orders" })
   @ApiBearerAuth()
-  @ApiBody({ type: [CreateOrderDto] })
   @ApiResponse({ status: 201, type: [OrderDto] })
   @ApiResponse({
     status: 400,
@@ -44,9 +44,9 @@ export class OrdersController {
       "\n3. Hired days is too short \n" +
       "\n4. Out of stock \n",
   })
-  @ApiResponse({ status: 404, description: "Not found product" })
+  @ApiResponse({ status: 404, description: "Not found product | address" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
-  public async createOrders(@Request() req, @Body() input: CreateOrderDto[]): Promise<OrderDto[]> {
+  public async createOrders(@Request() req, @Body() input: CreateOrdersDto): Promise<OrderDto[]> {
     const result = await this.__ordersService.createOrders(input, req.user);
     return plainToClass(OrderDto, result);
   }

@@ -3,6 +3,7 @@ import { Document, Schema as MongooseSchema } from "mongoose";
 import { Product } from "../../products/schemas/product.schema";
 import { User } from "../../users/schemas/user.schema";
 import { OrderStatus } from "../enums/order-status";
+import { Address } from "../../addresses/schemas/address.schema";
 
 @Schema({ timestamps: true })
 export class Order {
@@ -18,6 +19,12 @@ export class Order {
 
   @Prop({ required: true, type: MongooseSchema.Types.ObjectId, ref: "User" })
   lessee: User;
+
+  @Prop({ required: true, type: MongooseSchema.Types.ObjectId, ref: "Address" })
+  lessorAddress: Address;
+
+  @Prop({ required: true, type: MongooseSchema.Types.ObjectId, ref: "Address" })
+  lesseeAddress: Address;
 
   @Prop()
   thumbnailUrl: string;

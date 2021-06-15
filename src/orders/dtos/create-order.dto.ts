@@ -1,25 +1,28 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { IsDate, IsMongoId, IsNumber } from "class-validator";
+import { IsDate, IsMongoId, IsNumber, MinDate } from "class-validator";
+import * as moment from "moment";
 
 export class CreateOrderDto {
-  @IsMongoId()
   @Type(() => String)
+  @IsMongoId()
   @ApiProperty()
   productId: string;
 
-  @IsNumber()
   @Type(() => Number)
+  @IsNumber()
   @ApiProperty()
   quantity: number;
 
-  @IsDate()
   @Type(() => Date)
+  @IsDate()
+  @MinDate(new Date(moment().format("YYYY-MM-DD")))
   @ApiProperty()
   startDate: Date;
 
-  @IsDate()
   @Type(() => Date)
+  @IsDate()
+  @MinDate(new Date(moment().format("YYYY-MM-DD")))
   @ApiProperty()
   endDate: Date;
 }

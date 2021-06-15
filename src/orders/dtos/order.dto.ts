@@ -2,6 +2,7 @@ import { ProductDto } from "../../products/dtos/product.dto";
 import { UserDto } from "../../users/dtos/user.dto";
 import { Exclude, Expose, Type } from "class-transformer";
 import { ApiProperty } from "@nestjs/swagger";
+import { AddressDto } from "../../addresses/dtos/address.dto";
 
 @Exclude()
 export class OrderDto {
@@ -24,6 +25,16 @@ export class OrderDto {
   @Type(() => UserDto)
   @ApiProperty()
   lessee: UserDto;
+
+  @Expose()
+  @Type(() => AddressDto)
+  @ApiProperty()
+  lessorAddress: AddressDto;
+
+  @Expose()
+  @Type(() => AddressDto)
+  @ApiProperty()
+  lesseeAddress: AddressDto;
 
   @Expose()
   @Type(() => String)
