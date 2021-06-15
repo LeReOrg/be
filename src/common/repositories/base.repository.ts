@@ -9,18 +9,16 @@ import {
   UpdateWithAggregationPipeline,
 } from "mongoose";
 import { BaseModel } from "../interfaces/base-model";
+import { BaseQueryOptions } from "../interfaces/base-query-options";
 import { PaginatedDocument } from "../interfaces/paginated-document";
-
-interface PaginatedOptions extends QueryOptions {
-  page?: number;
-}
+import { PaginateQueryOptions } from "../interfaces/paginate-query-options";
 
 export class BaseRepository<T extends Document> {
   constructor(private readonly __model: BaseModel<T>) {}
 
   public async paginate(
     query: FilterQuery<T> = {},
-    options?: PaginatedOptions | null,
+    options?: PaginateQueryOptions | null,
   ): Promise<PaginatedDocument<T>> {
     return this.__model.paginate(query, options);
   }
@@ -84,7 +82,7 @@ export class BaseRepository<T extends Document> {
   public async findByIdOrThrowException(
     id: any,
     projection?: any | null,
-    options?: QueryOptions | null,
+    options?: BaseQueryOptions | null,
   ): Promise<T> {
     const document = await this.__model.findById(id, projection, options);
 

@@ -8,7 +8,7 @@ import { UpdateCategoryDto } from "./dtos/update-category.dto";
 import { ApiPaginatedResponse } from "../common/decorators/api-paginated-response.decorator";
 import { ProductDto } from "../products/dtos/product.dto";
 import { PaginatedDto } from "../common/dtos/paginated.dto";
-import { PaginatedProductsRequestDto } from "../products/dtos/paginated-products.request.dto";
+import { FilterProductsDto } from "../products/dtos/filter-products.dto";
 
 @Controller("categories")
 @ApiTags("Categories")
@@ -59,16 +59,16 @@ export class CategoriesController {
   }
 
   @Get("/:id/products")
-  @ApiOperation({ summary: "Fetch all products by category id" })
+  @ApiOperation({ summary: "Filter products by category id" })
   @ApiExtraModels(ProductDto, PaginatedDto)
   @ApiPaginatedResponse(ProductDto)
   @ApiResponse({ status: 404, description: "Not found category" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
-  public async fetchAllProductsByCategoryId(
+  public async filterProductsByCategoryId(
     @Param("id") id: string,
-    @Query() input: PaginatedProductsRequestDto,
+    @Query() input: FilterProductsDto,
   ): Promise<PaginatedDto<ProductDto>> {
-    const result = await this.__categoriesService.fetchAllProductsByCategoryId(id, input);
+    const result = await this.__categoriesService.filterProductsByCategoryId(id, input);
     return plainToClassFromExist(new PaginatedDto<ProductDto>(ProductDto), result);
   }
 }

@@ -5,21 +5,20 @@ import { UtilsHelper } from "../helpers/utils.helper";
 import { PaginatedDefaultOptions } from "../../common/enums/paginated-default-options";
 
 export class PaginatedRequestDto {
-  @IsNumber()
-  @IsOptional()
   @Type(() => Number)
-  @ApiPropertyOptional({ example: 10, default: PaginatedDefaultOptions.Limit })
-  limit?: number = PaginatedDefaultOptions.Limit;
-
+  @IsOptional()
   @IsNumber()
-  @IsOptional()
-  @Type(() => Number)
-  @ApiPropertyOptional({ example: 1, default: PaginatedDefaultOptions.Page })
-  page?: number = PaginatedDefaultOptions.Page;
+  @ApiPropertyOptional({ default: PaginatedDefaultOptions.Limit })
+  limit: number = PaginatedDefaultOptions.Limit;
 
+  @Type(() => Number)
   @IsOptional()
+  @IsNumber()
+  @ApiPropertyOptional({ default: PaginatedDefaultOptions.Page })
+  page: number = PaginatedDefaultOptions.Page;
+
   @Transform((params) => UtilsHelper.formatSortOptions(params.value))
-  @ApiPropertyOptional({ example: "name:asc,price:desc" })
-  // Fake type to work properly with swagger. Real type is: Record<string, string>
-  sort?: string;
+  @IsOptional()
+  @ApiPropertyOptional({ example: "name:asc,price:desc", type: String })
+  sort?: Record<string, string>;
 }

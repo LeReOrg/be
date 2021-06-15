@@ -4,17 +4,17 @@ import { CreateCategoryDto } from "./dtos/create-category.dto";
 import { Category } from "./schemas/category.schema";
 import { CloudinaryService } from "../cloudinary/cloudinary.service";
 import { UpdateCategoryDto } from "./dtos/update-category.dto";
-import { ProductsRepository } from "../products/products.repository";
-import { PaginatedProductsRequestDto } from "../products/dtos/paginated-products.request.dto";
 import { PaginatedDocument } from "../common/interfaces/paginated-document";
 import { Product } from "../products/schemas/product.schema";
+import { FilterProductsDto } from "../products/dtos/filter-products.dto";
+import { ProductsService } from "../products/products.service";
 
 @Injectable()
 export class CategoriesService {
   constructor(
     private __categoriesRepository: CategoriesRepository,
     private __cloudinaryService: CloudinaryService,
-    private __productsRepository: ProductsRepository,
+    private __productsService: ProductsService,
   ) {}
 
   public async fetchAll(): Promise<Category[]> {
@@ -51,23 +51,27 @@ export class CategoriesService {
     return this.__categoriesRepository.findByIdOrThrowException(id);
   }
 
-  public async fetchAllProductsByCategoryId(
+  public async filterProductsByCategoryId(
     id: string,
-    input: PaginatedProductsRequestDto,
+    input: FilterProductsDto,
   ): Promise<PaginatedDocument<Product>> {
     const category = await this.findByIdOrThrowError(id);
 
-    return this.__productsRepository.fetchAll(
+    return this.__productsService.filterProducts(
       {
-        rangedPrice: input.price,
-        cities: input.cities?.split(","),
+        categories: [category],
+        keyword: input.keyword,
+        priceRange: input.priceRange,
         isTopProduct: input.isTopProduct,
-        category,
+        wards: input.wards,
+        districts: input.districts,
+        provinces: input.provinces,
       },
       {
         limit: input.limit,
         page: input.page,
         sort: input.sort,
+        populate: input.populate,
       },
     );
   }

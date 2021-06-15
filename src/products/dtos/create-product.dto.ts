@@ -1,5 +1,4 @@
 import { DiscountDto } from "./discount.dto";
-import { LocationDto } from "./location.dto";
 import { UploadProductImageDto } from "./upload-product-image.dto";
 import {
   ArrayMinSize,
@@ -14,7 +13,14 @@ import {
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Transform, Type } from "class-transformer";
 import { BreadcrumbDto } from "./breadcrumb.dto";
+import { CreateProductAddressDto } from "../../addresses/dtos/create-product-address.dto";
 export class CreateProductDto {
+  @Type(() => String)
+  @IsString()
+  @IsMongoId()
+  @ApiProperty()
+  categoryId: string;
+
   @Type(() => String)
   @Transform((param) => param.value.trim())
   @IsString()
@@ -46,41 +52,6 @@ export class CreateProductDto {
   @ApiProperty()
   shortestHiredDays: number;
 
-  @Type(() => Boolean)
-  @IsBoolean()
-  @ApiPropertyOptional()
-  isTopProduct?: boolean;
-
-  @Type(() => String)
-  @IsString()
-  @IsOptional()
-  @ApiPropertyOptional()
-  term?: string;
-
-  @Type(() => String)
-  @IsString()
-  @IsOptional()
-  @ApiPropertyOptional()
-  requiredLicenses?: string;
-
-  @Type(() => BreadcrumbDto)
-  @ValidateNested({ each: true })
-  @IsOptional()
-  @IsArray()
-  @ApiPropertyOptional({ type: [BreadcrumbDto] })
-  breadcrumbs?: BreadcrumbDto[];
-
-  @Type(() => LocationDto)
-  @ValidateNested()
-  @ApiProperty({ type: LocationDto })
-  location: LocationDto;
-
-  @Type(() => DiscountDto)
-  @IsArray()
-  @ValidateNested({ each: true })
-  @ApiPropertyOptional({ type: [DiscountDto] })
-  discounts?: DiscountDto[];
-
   @Transform((params) =>
     params.value.map((value) => {
       if (typeof value === "string") {
@@ -95,9 +66,37 @@ export class CreateProductDto {
   @ApiProperty({ type: [UploadProductImageDto] })
   images: UploadProductImageDto[];
 
+  @Type(() => Boolean)
+  @IsBoolean()
+  @ApiPropertyOptional()
+  isTopProduct?: boolean;
+
   @Type(() => String)
   @IsString()
-  @IsMongoId()
-  @ApiProperty()
-  categoryId: string;
+  @IsOptional()
+  @ApiPropertyOptional()
+  term?: string;
+
+  @IsOptional()
+  @ApiPropertyOptional()
+  requiredLicenses?: Record<string, any>[];
+
+  @Type(() => BreadcrumbDto)
+  @ValidateNested({ each: true })
+  @IsOptional()
+  @IsArray()
+  @ApiPropertyOptional({ type: [BreadcrumbDto] })
+  breadcrumbs?: BreadcrumbDto[];
+
+  @Type(() => DiscountDto)
+  @IsArray()
+  @ValidateNested({ each: true })
+  @ApiPropertyOptional({ type: [DiscountDto] })
+  discounts?: DiscountDto[];
+
+  @Type(() => CreateProductAddressDto)
+  @ValidateNested()
+  @IsOptional()
+  @ApiProperty({ type: CreateProductAddressDto })
+  address?: CreateProductAddressDto;
 }

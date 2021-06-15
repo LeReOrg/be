@@ -1,9 +1,9 @@
 export enum OrderStatus {
   PendingConfirm = "PENDING CONFIRM",
-  PickingUp = "PICKING UP",
+  AwaitingPickup = "AWAITING PICKUP",
   Delivering = "DELIVERING",
   Delivered = "DELIVERED",
-  PendingReturn = "PENDING RETURN",
+  AwaitingReturnPickup = "AWAITING RETURN PICKUP",
   Returning = "RETURNING",
   Returned = "RETURNED",
   Cancelled = "CANCELLED",

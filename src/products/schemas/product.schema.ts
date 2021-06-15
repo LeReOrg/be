@@ -2,10 +2,10 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document, Schema as MongooseSchema } from "mongoose";
 import { CloudinaryImage } from "../../cloudinary/schemas/cloudinary-image.schema";
 import { Discount } from "./discount.schema";
-import { Location } from "./location.schema";
 import { User } from "../../users/schemas/user.schema";
 import { Category } from "../../categories/schemas/category.schema";
 import { Breadcrumb } from "./breadcrumb.schema";
+import { Address } from "../../addresses/schemas/address.schema";
 
 @Schema({ timestamps: true })
 export class Product {
@@ -22,41 +22,41 @@ export class Product {
   @Prop({ required: true })
   quantity: number;
 
-  @Prop()
+  @Prop({ required: true })
   description: string;
 
-  @Prop()
+  @Prop({ required: true })
   depositPrice: number;
 
-  @Prop()
+  @Prop({ required: true })
   shortestHiredDays: number;
 
   @Prop({ default: false })
   isTopProduct: boolean;
 
   @Prop({ required: false })
-  term: string;
+  term?: string;
 
   @Prop({ required: false })
-  requiredLicenses: string;
+  requiredLicenses?: Record<string, any>[];
 
   @Prop({ required: false })
-  breadcrumbs: Breadcrumb[];
+  breadcrumbs?: Breadcrumb[];
 
-  @Prop()
-  location: Location;
+  @Prop({ required: false })
+  discounts?: Discount[];
 
-  @Prop()
-  discounts: Discount[];
-
-  @Prop()
+  @Prop({ required: true })
   images: CloudinaryImage[];
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: "Category" })
+  @Prop({ required: true, type: MongooseSchema.Types.ObjectId, ref: "Category" })
   category: Category;
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: "User" })
+  @Prop({ required: true, type: MongooseSchema.Types.ObjectId, ref: "User" })
   user: User;
+
+  @Prop({ required: false, type: MongooseSchema.Types.ObjectId, ref: "Address" })
+  address?: Address;
 }
 
 export type ProductDocument = Product & Document;

@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { ProductsRepository } from "./products.repository";
 import { CloudinaryService } from "../cloudinary/cloudinary.service";
 import { Product } from "./schemas/product.schema";
-import { PaginatedProductsRequestDto } from "./dtos/paginated-products.request.dto";
 import { PaginatedDocument } from "../common/interfaces/paginated-document";
 import { UploadProductImageDto } from "./dtos/upload-product-image.dto";
 import { CreateProductDto } from "./dtos/create-product.dto";
@@ -13,6 +12,10 @@ import { Discount } from "./schemas/discount.schema";
 import { Breadcrumb } from "./schemas/breadcrumb.schema";
 import { BreadcrumbDto } from "./dtos/breadcrumb.dto";
 import { Category } from "../categories/schemas/category.schema";
+import { AddressesService } from "../addresses/addresses.service";
+import { AddressesRepository } from "../addresses/addresses.repository";
+import { FilterQuery } from "mongoose";
+import { Address } from "../addresses/schemas/address.schema";
 
 @Injectable()
 export class ProductsService {
@@ -20,25 +23,85 @@ export class ProductsService {
     private __productsRepository: ProductsRepository,
     private __categoriesRepository: CategoriesRepository,
     private __cloudinaryService: CloudinaryService,
+    private __addressesService: AddressesService,
+    private __addressesRepository: AddressesRepository,
   ) {}
 
-  public async fetchAll(input: PaginatedProductsRequestDto): Promise<PaginatedDocument<Product>> {
-    return this.__productsRepository.fetchAll(
-      {
-        rangedPrice: input.price,
-        cities: input.cities?.split(","),
-        isTopProduct: input.isTopProduct,
+  public async filterProducts(
+    filters: {
+      keyword?: string;
+      priceRange?: string;
+      isTopProduct?: boolean;
+      wards?: string[];
+      districts?: string[];
+      provinces?: string[];
+      categories?: Category[];
+      users?: User[];
+    },
+    options: {
+      limit: number;
+      page: number;
+      sort?: any;
+      populate?: string[];
+    },
+  ): Promise<PaginatedDocument<Product>> {
+    const conditions: FilterQuery<Product> = {};
+
+    if (filters) {
+      const { keyword, priceRange, isTopProduct, wards, districts, provinces, categories, users } =
+        filters;
+
+      if (keyword) {
+        conditions.name = { $regex: keyword, $options: "i" };
+      }
+      if (priceRange) {
+        const [fromPrice, toPrice] = priceRange.split("-");
+        const fromPriceCondition = fromPrice && { $gte: parseFloat(fromPrice) };
+        const toPriceCondition = toPrice && { $lte: parseFloat(toPrice) };
+
+        conditions.price = { ...fromPriceCondition, ...toPriceCondition };
+      }
+      if (typeof isTopProduct === "boolean") {
+        conditions.isTopProduct = isTopProduct || { $not: { $eq: true } };
+      }
+      if (wards?.length || districts?.length || provinces?.length) {
+        const addressesConditions: FilterQuery<Address> = {};
+
+        if (wards?.length) {
+          addressesConditions.ward = { $in: wards };
+        }
+        if (districts?.length) {
+          addressesConditions.district = { $in: districts };
+        }
+        if (provinces?.length) {
+          addressesConditions.province = { $in: provinces };
+        }
+
+        const addresses = await this.__addressesRepository.findAll(addressesConditions);
+
+        conditions.address = { $in: addresses };
+      }
+      if (categories?.length) {
+        conditions.category = { $in: categories };
+      }
+      if (users?.length) {
+        conditions.user = { $in: users };
+      }
+    }
+
+    // TODO: Using aggregation
+    return this.__productsRepository.paginate(conditions, {
+      ...options,
+      projection: {
+        images: { $slice: 1 },
       },
-      {
-        limit: input.limit,
-        page: input.page,
-        sort: input.sort,
-      },
-    );
+    });
   }
 
   public async findProductDetailById(id: string): Promise<Product> {
-    return this.__productsRepository.findProductDetailById(id);
+    return this.__productsRepository.findByIdOrThrowException(id, undefined, {
+      populate: ["user", "category", "address"],
+    });
   }
 
   private async __uploadProductImages(
@@ -131,7 +194,6 @@ export class ProductsService {
       isTopProduct: input.isTopProduct,
       term: input.term,
       requiredLicenses: input.requiredLicenses,
-      location: input.location,
       category,
       user,
     };
@@ -142,11 +204,14 @@ export class ProductsService {
     if (input.discounts) {
       payload.discounts = this.__sortProductDiscounts(input.discounts);
     }
-    console.log("run 1");
+    if (input.address) {
+      payload.address = await this.__addressesService.createProductAddress(input.address);
+    }
+
     const product = await this.__productsRepository.createOne(payload);
-    console.log("run 2");
+
     const images = await this.__uploadProductImages(input.images, product.id);
-    console.log("run 3");
+
     return this.__productsRepository.findByIdAndUpdate(product.id, { images });
   }
 }

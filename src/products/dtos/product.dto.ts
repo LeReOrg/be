@@ -1,89 +1,89 @@
 import { Exclude, Expose, Type } from "class-transformer";
-import { ApiResponseProperty } from "@nestjs/swagger";
+import { ApiProperty } from "@nestjs/swagger";
 import { CloudinaryImageDto } from "../../cloudinary/dtos/cloudinary-image.dtos";
 import { DiscountDto } from "./discount.dto";
-import { LocationDto } from "./location.dto";
 import { UserDto } from "../../users/dtos/user.dto";
 import { CategoryDto } from "../../categories/dtos/category.dto";
 import { BreadcrumbDto } from "./breadcrumb.dto";
+import { AddressDto } from "../../addresses/dtos/address.dto";
 
 @Exclude()
 export class ProductDto {
   @Expose()
-  @ApiResponseProperty()
+  @ApiProperty()
   _id: string;
 
   @Expose()
-  @ApiResponseProperty()
+  @ApiProperty()
   name: string;
 
   @Expose()
-  @ApiResponseProperty()
+  @ApiProperty()
   price: number;
 
   @Expose()
-  @ApiResponseProperty()
+  @ApiProperty()
   quantity: number;
 
   @Expose()
-  @ApiResponseProperty()
+  @ApiProperty()
   description: string;
 
   @Expose()
-  @ApiResponseProperty()
+  @ApiProperty()
   depositPrice: number;
 
   @Expose()
-  @ApiResponseProperty()
+  @ApiProperty()
   shortestHiredDays: number;
 
   @Expose()
-  @ApiResponseProperty()
+  @ApiProperty()
   isTopProduct: boolean;
 
   @Expose()
-  @ApiResponseProperty()
+  @ApiProperty()
   term: string;
 
   @Expose()
-  @ApiResponseProperty()
-  requiredLicenses: string;
+  @ApiProperty()
+  requiredLicenses: Record<string, any>[];
 
   @Expose()
   @Type(() => BreadcrumbDto)
-  @ApiResponseProperty({ type: [BreadcrumbDto] })
+  @ApiProperty({ type: [BreadcrumbDto] })
   breadcrumbs: BreadcrumbDto[];
 
   @Expose()
-  @Type(() => LocationDto)
-  @ApiResponseProperty({ type: LocationDto })
-  location: LocationDto;
-
-  @Expose()
   @Type(() => DiscountDto)
-  @ApiResponseProperty({ type: [DiscountDto] })
+  @ApiProperty({ type: [DiscountDto] })
   discounts: DiscountDto[];
 
   @Expose()
   @Type(() => CloudinaryImageDto)
-  @ApiResponseProperty({ type: [CloudinaryImageDto] })
+  @ApiProperty({ type: [CloudinaryImageDto] })
   images: CloudinaryImageDto[];
 
   @Expose()
   @Type(() => CategoryDto)
-  @ApiResponseProperty({ type: CategoryDto })
+  @ApiProperty({ type: CategoryDto })
   category: CategoryDto;
 
   @Expose()
   @Type(() => UserDto)
-  @ApiResponseProperty({ type: UserDto })
+  @ApiProperty({ type: UserDto })
   user: UserDto;
 
   @Expose()
-  @ApiResponseProperty({ example: "2021-06-02T07:53:00.865Z" })
+  @Type(() => AddressDto)
+  @ApiProperty({ type: AddressDto })
+  address: AddressDto;
+
+  @Expose()
+  @ApiProperty({ example: "2021-06-02T07:53:00.865Z" })
   createdAt: Date;
 
   @Expose()
-  @ApiResponseProperty({ example: "2021-06-02T07:53:00.865Z" })
+  @ApiProperty({ example: "2021-06-02T07:53:00.865Z" })
   updatedAt: Date;
 }

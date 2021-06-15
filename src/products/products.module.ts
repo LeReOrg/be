@@ -8,6 +8,7 @@ import { ProductsRepository } from "./products.repository";
 import { UsersModule } from "../users/users.module";
 import { CategoriesModule } from "../categories/categories.module";
 import { CloudinaryModule } from "../cloudinary/cloudinary.module";
+import { AddressesModule } from "../addresses/addresses.module";
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { CloudinaryModule } from "../cloudinary/cloudinary.module";
     forwardRef(() => UsersModule),
     forwardRef(() => CategoriesModule),
     CloudinaryModule,
+    AddressesModule,
   ],
   controllers: [ProductsController],
   providers: [ProductsService, ProductsRepository],

@@ -112,7 +112,7 @@ export class OrdersService {
       const hiredDays = this.__calculateHiredDays(data.startDate, data.endDate);
 
       const discountRateBasedOnHiredDays = this.__calculateHiredDaysDiscountRate(
-        product.discounts,
+        product.discounts || [],
         hiredDays,
       );
 
@@ -151,15 +151,15 @@ export class OrdersService {
     if (
       !currentStatus ||
       !newStatus ||
-      (newStatus === OrderStatus.PickingUp && currentStatus !== OrderStatus.PendingConfirm) ||
-      (newStatus === OrderStatus.Delivering && currentStatus !== OrderStatus.PickingUp) ||
+      (newStatus === OrderStatus.AwaitingPickup && currentStatus !== OrderStatus.PendingConfirm) ||
+      (newStatus === OrderStatus.Delivering && currentStatus !== OrderStatus.AwaitingPickup) ||
       (newStatus === OrderStatus.Delivered && currentStatus !== OrderStatus.Delivering) ||
-      (newStatus === OrderStatus.PendingReturn && currentStatus !== OrderStatus.Delivered) ||
-      (newStatus === OrderStatus.Returning && currentStatus !== OrderStatus.PendingReturn) ||
+      (newStatus === OrderStatus.AwaitingReturnPickup && currentStatus !== OrderStatus.Delivered) ||
+      (newStatus === OrderStatus.Returning && currentStatus !== OrderStatus.AwaitingReturnPickup) ||
       (newStatus === OrderStatus.Returned && currentStatus !== OrderStatus.Returning) ||
       // Only allow cancel the order before delivery
       (newStatus === OrderStatus.Cancelled && currentStatus !== OrderStatus.PendingConfirm) ||
-      (newStatus === OrderStatus.Cancelled && currentStatus !== OrderStatus.PickingUp)
+      (newStatus === OrderStatus.Cancelled && currentStatus !== OrderStatus.AwaitingReturnPickup)
     ) {
       throw new Error("Invalid Status");
     }

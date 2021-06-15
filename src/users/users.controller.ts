@@ -9,7 +9,7 @@ import { JwtAuthGuard } from "../authentication/guards/jwt.guard";
 import { UpdateUserDto } from "./dtos/update-user.dto";
 import { PaginatedRequestDto } from "../common/dtos/paginated.request.dto";
 import { ProductDto } from "../products/dtos/product.dto";
-import { PaginatedProductsRequestDto } from "../products/dtos/paginated-products.request.dto";
+import { FilterProductsDto } from "../products/dtos/filter-products.dto";
 
 @Controller("/users")
 @ApiTags("Users")
@@ -42,16 +42,16 @@ export class UsersController {
   }
 
   @Get("/:id/products")
-  @ApiOperation({ summary: "Fetch all products by user id" })
+  @ApiOperation({ summary: "Filter products by user id" })
   @ApiExtraModels(ProductDto, PaginatedDto)
   @ApiPaginatedResponse(ProductDto)
   @ApiResponse({ status: 404, description: "Not found user" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
-  public async fetchAllProductsByUserId(
+  public async filterProductsByUserId(
     @Param("id") id: string,
-    @Query() input: PaginatedProductsRequestDto,
+    @Query() input: FilterProductsDto,
   ): Promise<PaginatedDto<ProductDto>> {
-    const result = await this.__usersService.fetchAllProductsByUserId(id, input);
+    const result = await this.__usersService.filterProductsByUserId(id, input);
     return plainToClassFromExist(new PaginatedDto<ProductDto>(ProductDto), result);
   }
 }

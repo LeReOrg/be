@@ -3,15 +3,15 @@ import { PaginatedRequestDto } from "../common/dtos/paginated.request.dto";
 import { User } from "./schemas/user.schema";
 import { UsersRepository } from "./users.repository";
 import { PaginatedDocument } from "../common/interfaces/paginated-document";
-import { ProductsRepository } from "../products/products.repository";
-import { PaginatedProductsRequestDto } from "../products/dtos/paginated-products.request.dto";
 import { Product } from "../products/schemas/product.schema";
+import { FilterProductsDto } from "../products/dtos/filter-products.dto";
+import { ProductsService } from "../products/products.service";
 
 @Injectable()
 export class UsersService {
   constructor(
     private __usersRepository: UsersRepository,
-    private __productsRepository: ProductsRepository,
+    private __productsService: ProductsService,
   ) {}
 
   public async fetchAll(input: PaginatedRequestDto): Promise<PaginatedDocument<User>> {
@@ -36,23 +36,27 @@ export class UsersService {
     });
   }
 
-  public async fetchAllProductsByUserId(
+  public async filterProductsByUserId(
     id: string,
-    input: PaginatedProductsRequestDto,
+    input: FilterProductsDto,
   ): Promise<PaginatedDocument<Product>> {
     const user = await this.__usersRepository.findByIdOrThrowException(id);
 
-    return this.__productsRepository.fetchAll(
+    return this.__productsService.filterProducts(
       {
-        rangedPrice: input.price,
-        cities: input.cities?.split(","),
+        users: [user],
+        keyword: input.keyword,
+        priceRange: input.priceRange,
         isTopProduct: input.isTopProduct,
-        user,
+        wards: input.wards,
+        districts: input.districts,
+        provinces: input.provinces,
       },
       {
         limit: input.limit,
         page: input.page,
         sort: input.sort,
+        populate: input.populate,
       },
     );
   }
