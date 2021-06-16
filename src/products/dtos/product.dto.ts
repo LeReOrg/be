@@ -47,7 +47,7 @@ export class ProductDto {
 
   @Expose()
   @ApiProperty()
-  requiredLicenses: Record<string, any>[];
+  requiredLicenses: string[];
 
   @Expose()
   @Type(() => BreadcrumbDto)

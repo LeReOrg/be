@@ -2,8 +2,9 @@ import { INestApplication, ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
-import * as mongoose from "mongoose";
 import { ConfigService } from "@nestjs/config";
+import { urlencoded, json } from "express";
+import * as mongoose from "mongoose";
 
 const __initializeSwagger = (app: INestApplication): void => {
   const config = new DocumentBuilder()
@@ -23,6 +24,8 @@ async function bootstrap() {
 
   app.setGlobalPrefix("/api/v1");
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  app.use(json({ limit: "50mb" }));
+  app.use(urlencoded({ limit: "50mb", extended: true }));
 
   const config = app.get(ConfigService);
   const env = config.get<string>("environment");
