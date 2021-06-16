@@ -38,7 +38,7 @@ export class Product {
   term?: string;
 
   @Prop({ required: false })
-  requiredLicenses?: Record<string, any>[];
+  requiredLicenses?: string[];
 
   @Prop({ required: false })
   breadcrumbs?: Breadcrumb[];

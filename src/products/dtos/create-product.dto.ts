@@ -67,19 +67,22 @@ export class CreateProductDto {
   images: UploadProductImageDto[];
 
   @Type(() => Boolean)
+  @IsOptional()
   @IsBoolean()
   @ApiPropertyOptional()
   isTopProduct?: boolean;
 
   @Type(() => String)
-  @IsString()
   @IsOptional()
+  @IsString()
   @ApiPropertyOptional()
   term?: string;
 
+  @Type(() => String)
   @IsOptional()
+  @IsString()
   @ApiPropertyOptional()
-  requiredLicenses?: Record<string, any>[];
+  requiredLicenses?: string[];
 
   @Type(() => BreadcrumbDto)
   @ValidateNested({ each: true })
@@ -97,6 +100,6 @@ export class CreateProductDto {
   @Type(() => CreateProductAddressDto)
   @ValidateNested()
   @IsOptional()
-  @ApiProperty({ type: CreateProductAddressDto })
+  @ApiPropertyOptional({ type: CreateProductAddressDto })
   address?: CreateProductAddressDto;
 }

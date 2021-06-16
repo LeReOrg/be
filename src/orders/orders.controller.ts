@@ -22,9 +22,9 @@ import { ApiPaginatedResponse } from "../common/decorators/api-paginated-respons
 import { PaginatedDto } from "../common/dtos/paginated.dto";
 import { plainToClass, plainToClassFromExist } from "class-transformer";
 import { JwtAuthGuard } from "../authentication/guards/jwt.guard";
-import { CreateOrderDto } from "./dtos/create-order.dto";
 import { OrderDto } from "./dtos/order.dto";
 import { CreateOrdersDto } from "./dtos/create-orders.dto";
+import { FilterOrdersDto } from "./dtos/filter-orders.dto";
 
 @Controller("/orders")
 @ApiTags("Orders")
@@ -49,5 +49,24 @@ export class OrdersController {
   public async createOrders(@Request() req, @Body() input: CreateOrdersDto): Promise<OrderDto[]> {
     const result = await this.__ordersService.createOrders(input, req.user);
     return plainToClass(OrderDto, result);
+  }
+
+  @Get()
+  public async filterOrders(@Query() input: FilterOrdersDto) {
+    const result = await this.__ordersService.filterOrders(
+      {
+        productId: input.productId,
+        lessorId: input.lessorId,
+        lesseeId: input.lesseeId,
+        status: input.status,
+      },
+      {
+        limit: input.limit,
+        page: input.page,
+        sort: input.sort,
+        populate: input.populate,
+      },
+    );
+    return result;
   }
 }

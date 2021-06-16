@@ -8,7 +8,6 @@ import { plainToClass, plainToClassFromExist } from "class-transformer";
 import { FilterUserAddressesDto } from "./dtos/filter-user-addresses.dto";
 import { PaginatedDto } from "../common/dtos/paginated.dto";
 import { ApiPaginatedResponse } from "../common/decorators/api-paginated-response.decorator";
-import { User } from "../users/schemas/user.schema";
 
 @Controller("/users/addresses")
 @ApiTags("User Addresses")

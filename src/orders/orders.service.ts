@@ -175,6 +175,44 @@ export class OrdersService {
     return this.__ordersRepository.createMany(payloads);
   }
 
+  public async filterOrders(
+    filters: {
+      productId?: string;
+      lessorId?: string;
+      lesseeId?: string;
+      startDate?: Date;
+      endDate?: Date;
+      status?: string;
+    },
+    options: {
+      limit: number;
+      page: number;
+      sort?: any;
+      populate?: string[];
+    },
+  ) {
+    const conditions: any = {};
+
+    if (filters) {
+      const { lessorId, lesseeId, productId, status } = filters;
+
+      if (lessorId) {
+        conditions.lessor = lessorId;
+      }
+      if (lesseeId) {
+        conditions.lessee = lesseeId;
+      }
+      if (productId) {
+        conditions.product = productId;
+      }
+      if (status) {
+        conditions.status = status;
+      }
+    }
+
+    return this.__ordersRepository.paginate(conditions, options);
+  }
+
   // private __validateOnSetOrderStatus(currentStatus: string, newStatus: string): void {
   //   if (
   //     !currentStatus ||
