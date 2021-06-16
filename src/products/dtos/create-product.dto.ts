@@ -80,7 +80,7 @@ export class CreateProductDto {
 
   @Type(() => String)
   @IsOptional()
-  @IsString()
+  @IsString({ each: true })
   @ApiPropertyOptional()
   requiredLicenses?: string[];
 
