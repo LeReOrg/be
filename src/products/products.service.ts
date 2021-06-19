@@ -224,7 +224,7 @@ export class ProductsService {
     return this.__productsRepository.findByIdAndUpdate(
       product.id,
       { images },
-      { populate: "category" },
+      { populate: ["category", "address"] },
     );
   }
 }

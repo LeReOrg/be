@@ -96,7 +96,7 @@ export class BaseRepository<T extends Document> {
   public async findByIdAndUpdate(
     id: any,
     update: UpdateWithAggregationPipeline | UpdateQuery<T> | undefined,
-    options?: QueryOptions | null | undefined,
+    options?: BaseQueryOptions | null | undefined,
   ): Promise<T> {
     const document = await this.__model.findByIdAndUpdate(id, update, {
       useFindAndModify: false,
