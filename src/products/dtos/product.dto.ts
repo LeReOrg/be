@@ -42,22 +42,26 @@ export class ProductDto {
   isTopProduct: boolean;
 
   @Expose()
-  @ApiProperty()
-  term: string;
+  @ApiProperty({ required: false })
+  term?: string;
 
   @Expose()
-  @ApiProperty()
-  requiredLicenses: string[];
+  @ApiProperty({ required: false })
+  label?: string;
+
+  @Expose()
+  @ApiProperty({ required: false })
+  requiredLicenses?: string[];
 
   @Expose()
   @Type(() => BreadcrumbDto)
-  @ApiProperty({ type: [BreadcrumbDto] })
-  breadcrumbs: BreadcrumbDto[];
+  @ApiProperty({ required: false, type: [BreadcrumbDto] })
+  breadcrumbs?: BreadcrumbDto[];
 
   @Expose()
   @Type(() => DiscountDto)
-  @ApiProperty({ type: [DiscountDto] })
-  discounts: DiscountDto[];
+  @ApiProperty({ required: false, type: [DiscountDto] })
+  discounts?: DiscountDto[];
 
   @Expose()
   @Type(() => CloudinaryImageDto)

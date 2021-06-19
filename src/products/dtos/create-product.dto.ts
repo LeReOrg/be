@@ -76,6 +76,12 @@ export class CreateProductDto {
   @IsOptional()
   @IsString()
   @ApiPropertyOptional()
+  label?: string;
+
+  @Type(() => String)
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional()
   term?: string;
 
   @Type(() => String)

@@ -35,6 +35,9 @@ export class Product {
   isTopProduct: boolean;
 
   @Prop({ required: false })
+  label?: string;
+
+  @Prop({ required: false })
   term?: string;
 
   @Prop({ required: false })

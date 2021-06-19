@@ -192,6 +192,7 @@ export class ProductsService {
       depositPrice: input.depositPrice,
       shortestHiredDays: input.shortestHiredDays,
       isTopProduct: input.isTopProduct,
+      label: input.label,
       term: input.term,
       requiredLicenses: input.requiredLicenses,
       category,
@@ -220,6 +221,10 @@ export class ProductsService {
 
     const images = await this.__uploadProductImages(input.images, product.id);
 
-    return this.__productsRepository.findByIdAndUpdate(product.id, { images });
+    return this.__productsRepository.findByIdAndUpdate(
+      product.id,
+      { images },
+      { populate: "category" },
+    );
   }
 }
