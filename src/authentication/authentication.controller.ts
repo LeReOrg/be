@@ -89,9 +89,11 @@ export class AuthenticationController {
     summary:
       "Send email with OTP code and response OTP token." +
       "Using both of it to process further process of reset password",
+    description: "User who register/login with Gmail can not use this feature",
   })
   @ApiResponse({ status: 200, type: ForgotPasswordResponseBodyDto })
   @ApiResponse({ status: 400, description: "Invalid request message" })
+  @ApiResponse({ status: 403, description: "User can not use this feature" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
   public async forgotPassword(
     @Body() input: ForgotPasswordRequestBodyDto,
@@ -120,15 +122,15 @@ export class AuthenticationController {
   @UseGuards(JwtResetPasswordAuthGuard)
   @ApiOperation({ summary: "Reset password after verify OTP code and token" })
   @ApiBearerAuth()
-  @ApiResponse({ status: 200, type: VerifyOtpCodeRequestBodyDto })
+  @ApiResponse({ status: 200, type: UserDto })
   @ApiResponse({ status: 400, description: "Invalid request message" })
   @ApiResponse({ status: 401, description: "Token is invalid" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
   public async resetPassword(
     @Request() req,
     @Body() input: ResetPasswordRequestBodyDto,
-  ): Promise<OkResponseBodyDto> {
-    await this.__authenticationService.resetPassword(input.password, req.user);
-    return { status: "OK" };
+  ): Promise<UserDto> {
+    const result = await this.__authenticationService.resetPassword(input.password, req.user);
+    return plainToClass(UserDto, result);
   }
 }

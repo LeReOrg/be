@@ -1,6 +1,7 @@
 import * as crypto from "crypto";
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
@@ -106,6 +107,14 @@ export class AuthenticationService {
   }
 
   public async forgotPassword(email: string): Promise<string> {
+    const user = await this.__usersRepository.findOne({ email });
+
+    if (user && user.uid) {
+      throw new ForbiddenException(
+        "User who register with 3rd-party (E.g: Gmail) can not use this feature",
+      );
+    }
+
     const jwtSecretKey = this.__configService.get<string>("jwt.resetPasswordSecretKey");
 
     const otpCode = UtilsHelper.generateRandomString(6, { numericDigits: true });
@@ -129,16 +138,13 @@ export class AuthenticationService {
     }
   }
 
-  public async resetPassword(password: string, user: User): Promise<void> {
+  public async resetPassword(password: string, user: User): Promise<User> {
     const salt = user.salt;
     const hash = this.__hashPassword(password, salt);
-    return this.__usersRepository.updateOne(
-      { _id: user._id },
-      {
-        $set: { hash },
-        $unset: { "otp.resetPassword": "" },
-      },
-    );
+    return this.__usersRepository.findByIdAndUpdate(user._id, {
+      $set: { hash },
+      $unset: { "otp.resetPassword": "" },
+    });
   }
 
   public async registerAndLoginWithFirebase(
