@@ -69,6 +69,12 @@ export class AuthenticationService {
       throw new BadRequestException("Invalid email");
     }
 
+    if (user.uid) {
+      throw new ForbiddenException(
+        "This email already register with Firebase. Please use login with firebase to continue",
+      );
+    }
+
     const isMatchPassword = this.__isMatchPassword(input.password, user);
 
     if (!isMatchPassword) {
@@ -111,7 +117,7 @@ export class AuthenticationService {
 
     if (user && user.uid) {
       throw new ForbiddenException(
-        "User who register with 3rd-party (E.g: Gmail) can not use this feature",
+        "User who register with 3rd-party (E.g: Firebase) can not use this feature",
       );
     }
 
