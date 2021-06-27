@@ -25,19 +25,6 @@ export class CategoriesController {
     return plainToClass(CategoryDto, result);
   }
 
-  @Patch("/:id")
-  @ApiOperation({ summary: "Update a category by id" })
-  @ApiResponse({ status: 200, type: CategoryDto })
-  @ApiResponse({ status: 404, description: "Not found category" })
-  @ApiResponse({ status: 500, description: "Unexpected error happen" })
-  public async updateCategory(
-    @Param("id") id: string,
-    @Body() input: UpdateCategoryDto,
-  ): Promise<CategoryDto> {
-    const result = await this.__categoriesService.updateCategoryById(id, input);
-    return plainToClass(CategoryDto, result);
-  }
-
   @Get()
   @ApiOperation({ summary: "Fetch all categories. No pagination support" })
   @ApiResponse({ status: 200, type: [CategoryDto] })
@@ -55,6 +42,19 @@ export class CategoriesController {
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
   public async findByIdOrThrowError(@Param("id") id: string): Promise<CategoryDto> {
     const result = await this.__categoriesService.findByIdOrThrowError(id);
+    return plainToClass(CategoryDto, result);
+  }
+
+  @Patch("/:id")
+  @ApiOperation({ summary: "Update a category by id" })
+  @ApiResponse({ status: 200, type: CategoryDto })
+  @ApiResponse({ status: 404, description: "Not found category" })
+  @ApiResponse({ status: 500, description: "Unexpected error happen" })
+  public async updateCategory(
+    @Param("id") id: string,
+    @Body() input: UpdateCategoryDto,
+  ): Promise<CategoryDto> {
+    const result = await this.__categoriesService.updateCategoryById(id, input);
     return plainToClass(CategoryDto, result);
   }
 

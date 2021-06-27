@@ -14,5 +14,5 @@ export class CreateOrdersDto {
   @Type(() => String)
   @IsMongoId()
   @ApiProperty()
-  address: string;
+  addressId: string;
 }

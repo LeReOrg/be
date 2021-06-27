@@ -1,8 +1,8 @@
-import { ProductDto } from "../../products/dtos/product.dto";
 import { UserDto } from "../../users/dtos/user.dto";
 import { Exclude, Expose, Type } from "class-transformer";
 import { ApiProperty } from "@nestjs/swagger";
 import { AddressDto } from "../../addresses/dtos/address.dto";
+import { OrderDetailDto } from "../../order-details/dtos/order-detail.dto";
 
 @Exclude()
 export class OrderDto {
@@ -12,34 +12,29 @@ export class OrderDto {
   _id: string;
 
   @Expose()
-  @Type(() => ProductDto)
-  @ApiProperty()
-  product: ProductDto;
+  @Type(() => OrderDetailDto)
+  @ApiProperty({ type: OrderDetailDto })
+  detail: OrderDetailDto;
 
   @Expose()
   @Type(() => UserDto)
-  @ApiProperty()
+  @ApiProperty({ type: UserDto })
   lessor: UserDto;
 
   @Expose()
+  @Type(() => AddressDto)
+  @ApiProperty({ type: AddressDto })
+  lessorAddress: AddressDto;
+
+  @Expose()
   @Type(() => UserDto)
-  @ApiProperty()
+  @ApiProperty({ type: UserDto })
   lessee: UserDto;
 
   @Expose()
   @Type(() => AddressDto)
-  @ApiProperty()
-  lessorAddress: AddressDto;
-
-  @Expose()
-  @Type(() => AddressDto)
-  @ApiProperty()
+  @ApiProperty({ type: AddressDto })
   lesseeAddress: AddressDto;
-
-  @Expose()
-  @Type(() => String)
-  @ApiProperty()
-  thumbnailUrl: string;
 
   @Expose()
   @Type(() => Number)
@@ -55,11 +50,6 @@ export class OrderDto {
   @Type(() => Date)
   @ApiProperty()
   endDate: Date;
-
-  @Expose()
-  @Type(() => Number)
-  @ApiProperty()
-  quantity: number;
 
   @Expose()
   @Type(() => Number)

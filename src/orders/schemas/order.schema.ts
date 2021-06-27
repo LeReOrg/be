@@ -1,9 +1,9 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document, Schema as MongooseSchema } from "mongoose";
-import { Product } from "../../products/schemas/product.schema";
 import { User } from "../../users/schemas/user.schema";
 import { OrderStatus } from "../enums/order-status";
 import { Address } from "../../addresses/schemas/address.schema";
+import { OrderDetail } from "../../order-details/schemas/order-detail.schema";
 
 @Schema({ timestamps: true })
 export class Order {
@@ -11,8 +11,8 @@ export class Order {
 
   id: string;
 
-  @Prop({ required: true, type: MongooseSchema.Types.ObjectId, ref: "Product" })
-  product: Product;
+  @Prop({ required: true, type: MongooseSchema.Types.ObjectId, ref: "OrderDetail" })
+  detail: OrderDetail;
 
   @Prop({ required: true, type: MongooseSchema.Types.ObjectId, ref: "User" })
   lessor: User;
@@ -26,9 +26,6 @@ export class Order {
   @Prop({ required: true, type: MongooseSchema.Types.ObjectId, ref: "Address" })
   lesseeAddress: Address;
 
-  @Prop()
-  thumbnailUrl: string;
-
   @Prop({ required: true })
   hiredDays: number;
 
@@ -37,9 +34,6 @@ export class Order {
 
   @Prop({ required: true })
   endDate: Date;
-
-  @Prop({ required: true })
-  quantity: number;
 
   @Prop({ required: true })
   amount: number;

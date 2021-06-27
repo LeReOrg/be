@@ -14,17 +14,10 @@ export class FilterOrdersDto extends PaginatedRequestDto {
     required: false,
     type: String,
     example:
-      `${OrderPopulate.Product},${OrderPopulate.Lessor},${OrderPopulate.Lessee},` +
-      `${OrderPopulate.LessorAddress},${OrderPopulate.LesseeAddress}`,
+      `${OrderPopulate.Detail},${OrderPopulate.Product},${OrderPopulate.Lessor},` +
+      `${OrderPopulate.Lessee},${OrderPopulate.LessorAddress},${OrderPopulate.LesseeAddress}`,
   })
   populate?: string[];
-
-  @Type(() => String)
-  @IsOptional()
-  @IsString()
-  @IsMongoId()
-  @ApiProperty({ required: false })
-  productId?: string;
 
   @Type(() => String)
   @IsOptional()

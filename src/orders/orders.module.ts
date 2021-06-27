@@ -7,6 +7,7 @@ import { OrdersService } from "./orders.service";
 import { OrdersController } from "./orders.controller";
 import { ProductsModule } from "../products/products.module";
 import { AddressesModule } from "../addresses/addresses.module";
+import { OrderDetailsModule } from "../order-details/order-details.module";
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AddressesModule } from "../addresses/addresses.module";
     ]),
     forwardRef(() => ProductsModule),
     forwardRef(() => AddressesModule),
+    OrderDetailsModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersRepository, OrdersService],

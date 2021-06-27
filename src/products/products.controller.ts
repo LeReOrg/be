@@ -14,6 +14,19 @@ import { FilterProductsDto } from "./dtos/filter-products.dto";
 export class ProductsController {
   constructor(private __productsService: ProductsService) {}
 
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Create a product" })
+  @ApiResponse({ status: 201, type: ProductDto })
+  @ApiResponse({ status: 400, description: "Invalid request message" })
+  @ApiResponse({ status: 404, description: "Not Found Category" })
+  @ApiResponse({ status: 500, description: "Unexpected error happen" })
+  public async createProduct(@Request() req, @Body() input: CreateProductDto): Promise<ProductDto> {
+    const result = await this.__productsService.createProduct(input, req.user);
+    return plainToClass(ProductDto, result);
+  }
+
   @Get()
   @ApiOperation({ summary: "Filter products" })
   @ApiExtraModels(ProductDto, PaginatedDto)
@@ -50,19 +63,6 @@ export class ProductsController {
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
   public async findProductDetailById(@Param("id") id: string): Promise<ProductDto> {
     const result = await this.__productsService.findProductDetailById(id);
-    return plainToClass(ProductDto, result);
-  }
-
-  @Post()
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: "Create a product" })
-  @ApiResponse({ status: 201, type: ProductDto })
-  @ApiResponse({ status: 400, description: "Invalid request message" })
-  @ApiResponse({ status: 404, description: "Not Found Category" })
-  @ApiResponse({ status: 500, description: "Unexpected error happen" })
-  public async createProduct(@Request() req, @Body() input: CreateProductDto): Promise<ProductDto> {
-    const result = await this.__productsService.createProduct(input, req.user);
     return plainToClass(ProductDto, result);
   }
 }

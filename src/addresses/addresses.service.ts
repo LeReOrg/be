@@ -60,8 +60,9 @@ export class AddressesService {
       payload.isDefaultAddress = true;
       payload.isPickupAddress = true;
       payload.isShippingAddress = true;
-      payload.user = user;
     }
+
+    payload.user = user;
 
     return this.__addressesRepository.createOne(payload);
   }

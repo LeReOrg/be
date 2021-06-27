@@ -8,6 +8,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Min,
   ValidateNested,
 } from "class-validator";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
@@ -29,12 +30,14 @@ export class CreateProductDto {
 
   @Type(() => Number)
   @IsNumber()
-  @ApiProperty()
+  @Min(0)
+  @ApiProperty({ minimum: 0 })
   price: number;
 
   @Type(() => Number)
   @IsNumber()
-  @ApiProperty()
+  @Min(0)
+  @ApiProperty({ minimum: 0 })
   quantity: number;
 
   @Type(() => String)
@@ -44,12 +47,14 @@ export class CreateProductDto {
 
   @Type(() => Number)
   @IsNumber()
-  @ApiProperty()
+  @Min(0)
+  @ApiProperty({ minimum: 0 })
   depositPrice: number;
 
   @Type(() => Number)
   @IsNumber()
-  @ApiProperty()
+  @Min(0)
+  @ApiProperty({ minimum: 0 })
   shortestHiredDays: number;
 
   @Transform((params) =>
