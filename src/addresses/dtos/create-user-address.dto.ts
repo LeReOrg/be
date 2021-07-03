@@ -3,6 +3,16 @@ import { Type } from "class-transformer";
 import { IsBoolean, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateUserAddressDto {
+  @Type(() => String)
+  @IsString()
+  @ApiProperty()
+  fullName: string;
+
+  @Type(() => String)
+  @IsString()
+  @ApiProperty()
+  phoneNumber: string;
+
   @Type(() => Number)
   @IsOptional()
   @IsNumber()

@@ -8,6 +8,16 @@ export class AddressDto {
   _id: string;
 
   @Expose()
+  @Type(() => String)
+  @ApiProperty()
+  fullName: string;
+
+  @Expose()
+  @Type(() => String)
+  @ApiProperty()
+  phoneNumber: string;
+
+  @Expose()
   @Type(() => Number)
   @ApiProperty({ required: false })
   latitude?: number;

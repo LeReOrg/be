@@ -1,13 +1,18 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document, Schema as MongooseSchema } from "mongoose";
 import { User } from "../../users/schemas/user.schema";
-// import { Product } from "../../products/schemas/product.schema";
 
 @Schema({ timestamps: true })
 export class Address {
   _id: MongooseSchema.Types.ObjectId;
 
   id: string;
+
+  @Prop({ required: true })
+  fullName: string;
+
+  @Prop({ required: true })
+  phoneNumber: string;
 
   @Prop({ required: false })
   latitude?: number;
@@ -38,9 +43,6 @@ export class Address {
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: "User" })
   user: User;
-
-  // @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: "Product" }] })
-  // products: Product[];
 }
 
 export type AddressDocument = Address & Document;
