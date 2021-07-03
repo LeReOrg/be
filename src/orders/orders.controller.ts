@@ -26,6 +26,8 @@ import { OrderDto } from "./dtos/order.dto";
 import { CreateOrdersDto } from "./dtos/create-orders.dto";
 import { UpdateOrderDto } from "./dtos/update-order.dto";
 import { FilterOrdersDto } from "./dtos/filter-orders.dto";
+import { OrderStatus } from "./enums/order-status";
+import { OkResponseBodyDto } from "../common/dtos/ok.response.dto";
 
 @Controller("/orders")
 @ApiTags("Orders")
@@ -47,11 +49,8 @@ export class OrdersController {
   })
   @ApiResponse({ status: 404, description: "Not found product | address" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
-  public async createUserOrders(
-    @Request() req,
-    @Body() input: CreateOrdersDto,
-  ): Promise<OrderDto[]> {
-    const result = await this.__ordersService.createUserOrders(input, req.user);
+  public async createOrders(@Request() req, @Body() input: CreateOrdersDto): Promise<OrderDto[]> {
+    const result = await this.__ordersService.createOrders(input, req.user);
     return plainToClass(OrderDto, result);
   }
 
@@ -100,18 +99,65 @@ export class OrdersController {
     status: 400,
     description:
       "\n1. Invalid request message" +
-      "\n2. Invalid startDate/endDate  \n" +
+      "\n2. Invalid startDate/endDate \n" +
       "\n3. Hired days is too short \n" +
       "\n4. Out of stock \n",
   })
+  @ApiResponse({
+    status: 403,
+    description: `\n1. User is not lessee \n2. Order status is not ${OrderStatus.PendingConfirm}`,
+  })
   @ApiResponse({ status: 404, description: "Not found order | address" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
-  public async updateUserOrderById(
+  public async updateOrderById(
     @Request() req,
     @Param("id") id: string,
     @Body() input: UpdateOrderDto,
   ): Promise<OrderDto> {
-    const result = await this.__ordersService.updateUserOrderById(id, input, req.user);
+    const result = await this.__ordersService.updateOrderById(id, input, req.user);
     return plainToClass(OrderDto, result);
+  }
+
+  @Post("/:id/confirm")
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: "Confirm an order by id",
+    description: "Can only perform by lessor",
+  })
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, type: OkResponseBodyDto })
+  @ApiResponse({ status: 400, description: "Invalid request message" })
+  @ApiResponse({
+    status: 403,
+    description:
+      "1. User is not lessor" +
+      `\n2. Order status is not ${OrderStatus.PendingConfirm}` +
+      "\n3. Order is outdated (startDate < now)",
+  })
+  @ApiResponse({ status: 404, description: "Not found order" })
+  @ApiResponse({ status: 500, description: "Unexpected error happen" })
+  public async confirmOrderById(@Request() req, @Param("id") id: string) {
+    await this.__ordersService.confirmOrderById(id, req.user);
+    return { status: "OK" };
+  }
+
+  @Post("/:id/cancel")
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: "Cancel an order by id",
+    description: `Lessor and Lessee can only cancel ${OrderStatus.PendingConfirm} order`,
+  })
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, type: OkResponseBodyDto })
+  @ApiResponse({ status: 400, description: "Invalid request message" })
+  @ApiResponse({
+    status: 403,
+    description: `1. User is not lessor/lessee \n2. Order status is not ${OrderStatus.PendingConfirm}`,
+  })
+  @ApiResponse({ status: 404, description: "Not found order" })
+  @ApiResponse({ status: 500, description: "Unexpected error happen" })
+  public async cancelOrderById(@Request() req, @Param("id") id: string) {
+    await this.__ordersService.cancelOrderById(id, req.user);
+    return { status: "OK" };
   }
 }

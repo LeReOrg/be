@@ -32,6 +32,7 @@ export class UserAddressesController {
   @Get()
   @UseGuards(JwtAuthGuard)
   @ApiExtraModels(AddressDto, PaginatedDto)
+  @ApiBearerAuth()
   @ApiPaginatedResponse(AddressDto)
   @ApiResponse({ status: 400, description: "Invalid request message" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })

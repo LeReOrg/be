@@ -138,7 +138,7 @@ export class OrdersService {
     return { products, address };
   }
 
-  public async createUserOrders(input: CreateOrdersDto, user: User): Promise<Order[]> {
+  public async createOrders(input: CreateOrdersDto, user: User): Promise<Order[]> {
     const { products, address } = await this.__validateCreateOrdersInput(input);
 
     return Promise.all(
@@ -241,16 +241,16 @@ export class OrdersService {
   }
 
   private __checkPermissionToUpdatePendingConfirmOrder(user: User, order: Order): void {
+    const isLesseeOfOrder = this.__isLesseeOfOrder(user, order);
+
+    if (!isLesseeOfOrder) {
+      throw new ForbiddenException("User is not lessee");
+    }
+
     const isPendingConfirmOrder = this.__isPendingConfirmOrder(order.status);
 
     if (!isPendingConfirmOrder) {
       throw new ForbiddenException(`Can not modify order with status \t"${order.status}"\t`);
-    }
-
-    const isOwnThisOrder = this.__isLesseeOfOrder(user, order);
-
-    if (!isOwnThisOrder) {
-      throw new ForbiddenException("User do not own this order");
     }
   }
 
@@ -266,7 +266,7 @@ export class OrdersService {
     });
   }
 
-  public async updateUserOrderById(id: any, input: UpdateOrderDto, user: User) {
+  public async updateOrderById(id: any, input: UpdateOrderDto, user: User): Promise<Order> {
     const order = await this.__ordersRepository.findByIdOrThrowException(id, undefined, {
       populate: [{ path: "detail", populate: { path: "product" } }, { path: "lessee" }],
     });
@@ -331,53 +331,98 @@ export class OrdersService {
     return this.findOrderDetailById(id);
   }
 
-  // this.__addressesRepository.createOne({
-  //   latitude: product.address?.latitude,
-  //   longitude: product.address?.longitude,
-  //   street: product.address?.street,
-  //   ward: product.address?.ward,
-  //   district: product.address?.district,
-  //   province: product.address?.province,
-  // }),
-  // this.__addressesRepository.createOne({
-  //   latitude: address.latitude,
-  //   longitude: address.longitude,
-  //   street: address.street,
-  //   ward: address.ward,
-  //   district: address.district,
-  //   province: address.province,
-  // }),
+  private __isLessorOfOrder(user: User, order: Order): boolean {
+    return user.id === order.lessor.id;
+  }
 
-  // private __validateOnSetOrderStatus(currentStatus: string, newStatus: string): void {
-  //   if (
-  //     !currentStatus ||
-  //     !newStatus ||
-  //     (newStatus === OrderStatus.AwaitingPickup && currentStatus !== OrderStatus.PendingConfirm) ||
-  //     (newStatus === OrderStatus.Delivering && currentStatus !== OrderStatus.AwaitingPickup) ||
-  //     (newStatus === OrderStatus.Delivered && currentStatus !== OrderStatus.Delivering) ||
-  //     (newStatus === OrderStatus.AwaitingReturnPickup && currentStatus !== OrderStatus.Delivered) ||
-  //     (newStatus === OrderStatus.Returning && currentStatus !== OrderStatus.AwaitingReturnPickup) ||
-  //     (newStatus === OrderStatus.Returned && currentStatus !== OrderStatus.Returning) ||
-  //     // Only allow cancel the order before delivery
-  //     (newStatus === OrderStatus.Cancelled && currentStatus !== OrderStatus.PendingConfirm) ||
-  //     (newStatus === OrderStatus.Cancelled && currentStatus !== OrderStatus.AwaitingReturnPickup)
-  //   ) {
-  //     throw new Error("Invalid Status");
-  //   }
-  // }
+  private __isOutdatedOrder(orderStartDate: Date): boolean {
+    const now = moment();
+    const startDate = moment(orderStartDate);
+    return startDate.isBefore(now, "day");
+  }
 
-  // public async updateOrder(id: string, input: any) {
-  //   const order = await this.__ordersRepository.findByIdOrThrowException(id);
+  private __checkPermissionToConfirmOrder(user: User, order: Order): void {
+    const isLessorOfOrder = this.__isLessorOfOrder(user, order);
+    if (!isLessorOfOrder) {
+      throw new ForbiddenException("User is not lessor");
+    }
 
-  //   const payload: Partial<Order> = {};
+    const isPendingConfirmOrder = this.__isPendingConfirmOrder(order.status);
+    if (!isPendingConfirmOrder) {
+      throw new ForbiddenException(`Can only confirm ${OrderStatus.PendingConfirm} order`);
+    }
 
-  //   if (input.quantity) {
-  //     payload.quantity = input.quantity;
-  //   }
+    const isOutDated = this.__isOutdatedOrder(order.startDate);
+    if (isOutDated) {
+      throw new ForbiddenException("Order is outdated");
+    }
+  }
 
-  //   // if (input.status) {
-  //   //   this.__validateOnSetOrderStatus(order.status, input.status.toUpperCase());
-  //   //   payload.status = input.status;
-  //   // }
-  // }
+  private async __duplicatedOrderAddress(originalAddress: Address): Promise<Address> {
+    return this.__addressesRepository.createOne({
+      fullName: originalAddress.fullName,
+      phoneNumber: originalAddress.phoneNumber,
+      latitude: originalAddress.latitude,
+      longitude: originalAddress.longitude,
+      street: originalAddress.street,
+      ward: originalAddress.ward,
+      district: originalAddress.district,
+      province: originalAddress.province,
+    });
+  }
+
+  public async confirmOrderById(id: any, user: User): Promise<void> {
+    const order = await this.findOrderDetailById(id);
+
+    this.__checkPermissionToConfirmOrder(user, order);
+
+    const { detail, lessorAddress, lesseeAddress } = order;
+    const { product } = detail;
+
+    // Remove unnecessary address info before duplicate
+    const [duplicatedLessorAddress, duplicatedLesseeAddress] = await Promise.all([
+      this.__duplicatedOrderAddress(lessorAddress),
+      this.__duplicatedOrderAddress(lesseeAddress),
+    ]);
+
+    await Promise.all([
+      this.__productsRepository.updateOne(
+        { _id: product._id },
+        { $inc: { quantity: -detail.quantity } },
+      ),
+      this.__ordersRepository.updateOne(
+        { _id: order._id },
+        {
+          lessorAddress: duplicatedLessorAddress,
+          lesseeAddress: duplicatedLesseeAddress,
+          status: OrderStatus.AwaitingPickup,
+        },
+      ),
+    ]);
+  }
+
+  private __isLessorOrLesseeOfOrder(user: User, order: Order): boolean {
+    return this.__isLessorOfOrder(user, order) || this.__isLesseeOfOrder(user, order);
+  }
+
+  private __checkPermissionToCancelOrder(user: User, order: Order): void {
+    const isLessorOrLesseeOfOrder = this.__isLessorOrLesseeOfOrder(user, order);
+    if (!isLessorOrLesseeOfOrder) {
+      throw new ForbiddenException("User is not lessor or lessee");
+    }
+
+    if (order.status !== OrderStatus.PendingConfirm) {
+      throw new ForbiddenException(
+        `Lessor/Lessee can only cancel ${OrderStatus.PendingConfirm} order`,
+      );
+    }
+  }
+
+  public async cancelOrderById(id: any, user: User): Promise<void> {
+    const order = await this.findOrderDetailById(id);
+
+    this.__checkPermissionToCancelOrder(user, order);
+
+    await this.__ordersRepository.updateOne({ _id: order._id }, { status: OrderStatus.Cancelled });
+  }
 }
