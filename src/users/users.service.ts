@@ -26,14 +26,8 @@ export class UsersService {
     return result;
   }
 
-  public async updateUser(user: User, input: Partial<User>): Promise<User> {
-    return this.__usersRepository.findByIdAndUpdate(user._id, {
-      displayName: input.displayName,
-      phoneNumber: input.phoneNumber,
-      birthDay: input.birthDay,
-      gender: input.gender,
-      isHirer: input.isHirer,
-    });
+  public async updateUser(input: Partial<User>, user: User): Promise<User> {
+    return this.__usersRepository.findByIdAndUpdate(user._id, { ...input });
   }
 
   public async filterProductsByUserId(

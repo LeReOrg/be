@@ -37,7 +37,7 @@ export class UsersController {
   @ApiResponse({ status: 401, description: "Invalid token" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
   public async updateUser(@Request() req: any, @Body() input: UpdateUserDto): Promise<UserDto> {
-    const document = await this.__usersService.updateUser(req.user, input);
+    const document = await this.__usersService.updateUser(input, req.user);
     return plainToClass(UserDto, document);
   }
 
