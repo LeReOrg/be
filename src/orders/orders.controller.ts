@@ -10,14 +10,7 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { OrdersService } from "./orders.service";
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiExtraModels,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from "@nestjs/swagger";
+import { ApiBearerAuth, ApiExtraModels, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { ApiPaginatedResponse } from "../common/decorators/api-paginated-response.decorator";
 import { PaginatedDto } from "../common/dtos/paginated.dto";
 import { plainToClass, plainToClassFromExist } from "class-transformer";
@@ -121,8 +114,8 @@ export class OrdersController {
   @Post("/:id/confirm")
   @UseGuards(JwtAuthGuard)
   @ApiOperation({
-    summary: "Confirm an order by id",
-    description: "Can only perform by lessor",
+    summary: "Lessor use this api to confirm an order",
+    description: `Order status will change from ${OrderStatus.PendingConfirm} to ${OrderStatus.AwaitingPickup}`,
   })
   @ApiBearerAuth()
   @ApiResponse({ status: 200, type: OkResponseBodyDto })
@@ -144,11 +137,11 @@ export class OrdersController {
   @Post("/:id/cancel")
   @UseGuards(JwtAuthGuard)
   @ApiOperation({
-    summary: "Cancel an order by id",
-    description: `Lessor and Lessee can only cancel ${OrderStatus.PendingConfirm} order`,
+    summary: "Lessor or lessee use this api to cancel an order by id",
+    description: `Order status will be change from ${OrderStatus.PendingConfirm} to ${OrderStatus.Cancelled}`,
   })
   @ApiBearerAuth()
-  @ApiResponse({ status: 200, type: OkResponseBodyDto })
+  @ApiResponse({ status: 200, type: OrderDto })
   @ApiResponse({ status: 400, description: "Invalid request message" })
   @ApiResponse({
     status: 403,
@@ -156,8 +149,114 @@ export class OrdersController {
   })
   @ApiResponse({ status: 404, description: "Not found order" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
-  public async cancelOrderById(@Request() req, @Param("id") id: string) {
-    await this.__ordersService.cancelOrderById(id, req.user);
-    return { status: "OK" };
+  public async cancelOrderById(@Request() req, @Param("id") id: string): Promise<OrderDto> {
+    const result = await this.__ordersService.cancelOrderById(id, req.user);
+    return plainToClass(OrderDto, result);
+  }
+
+  @Post("/:id/delivery")
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: "Delivering order product to lessee",
+    description: `Order status will be change from ${OrderStatus.AwaitingPickup} to ${OrderStatus.Delivering}`,
+  })
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, type: OrderDto })
+  @ApiResponse({ status: 400, description: "Invalid request message" })
+  @ApiResponse({
+    status: 403,
+    description: `Order status is not ${OrderStatus.AwaitingPickup}`,
+  })
+  @ApiResponse({ status: 404, description: "Not found order" })
+  @ApiResponse({ status: 500, description: "Unexpected error happen" })
+  public async deliveryOrderById(@Request() req, @Param("id") id: string): Promise<OrderDto> {
+    const result = await this.__ordersService.updateOrderStatusById(id, OrderStatus.Delivering);
+    return plainToClass(OrderDto, result);
+  }
+
+  @Post("/:id/receive")
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: "Lessee receive order",
+    description: `Order status will be change from ${OrderStatus.Delivering} to ${OrderStatus.Delivered}`,
+  })
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, type: OrderDto })
+  @ApiResponse({ status: 400, description: "Invalid request message" })
+  @ApiResponse({
+    status: 403,
+    description: `Order status is not ${OrderStatus.Delivering}`,
+  })
+  @ApiResponse({ status: 404, description: "Not found order" })
+  @ApiResponse({ status: 500, description: "Unexpected error happen" })
+  public async receiveOrderById(@Request() req, @Param("id") id: string): Promise<OrderDto> {
+    const result = await this.__ordersService.updateOrderStatusById(id, OrderStatus.Delivered);
+    return plainToClass(OrderDto, result);
+  }
+
+  @Post("/:id/wait-return")
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: `This API is a plan B since ${OrderStatus.AwaitingReturnPickup} will be set automatically by system`,
+    description: `Order status will be change from ${OrderStatus.Delivered} to ${OrderStatus.AwaitingReturnPickup}`,
+  })
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, type: OrderDto })
+  @ApiResponse({ status: 400, description: "Invalid request message" })
+  @ApiResponse({
+    status: 403,
+    description: `Order status is not ${OrderStatus.Delivered}`,
+  })
+  @ApiResponse({ status: 404, description: "Not found order" })
+  @ApiResponse({ status: 500, description: "Unexpected error happen" })
+  public async waitForReturnOrderById(@Request() req, @Param("id") id: string): Promise<OrderDto> {
+    const result = await this.__ordersService.updateOrderStatusById(
+      id,
+      OrderStatus.AwaitingReturnPickup,
+    );
+    return plainToClass(OrderDto, result);
+  }
+
+  @Post("/:id/return")
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: "Returning product to lessor",
+    description: `Order status will be change from ${OrderStatus.AwaitingPickup} to ${OrderStatus.Returning}`,
+  })
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, type: OrderDto })
+  @ApiResponse({ status: 400, description: "Invalid request message" })
+  @ApiResponse({
+    status: 403,
+    description: `Order status is not ${OrderStatus.AwaitingPickup}`,
+  })
+  @ApiResponse({ status: 404, description: "Not found order" })
+  @ApiResponse({ status: 500, description: "Unexpected error happen" })
+  public async returnOrderProductById(@Request() req, @Param("id") id: string): Promise<OrderDto> {
+    const result = await this.__ordersService.updateOrderStatusById(id, OrderStatus.Returning);
+    return plainToClass(OrderDto, result);
+  }
+
+  @Post("/:id/confirm-returned")
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: "Confirming product is returned to lessor",
+    description: `Order status will be change from ${OrderStatus.Returning} to ${OrderStatus.Returned}`,
+  })
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, type: OrderDto })
+  @ApiResponse({ status: 400, description: "Invalid request message" })
+  @ApiResponse({
+    status: 403,
+    description: `Order status is not ${OrderStatus.Returning}`,
+  })
+  @ApiResponse({ status: 404, description: "Not found order" })
+  @ApiResponse({ status: 500, description: "Unexpected error happen" })
+  public async confirmReturnedOrderProductById(
+    @Request() req,
+    @Param("id") id: string,
+  ): Promise<OrderDto> {
+    const result = await this.__ordersService.updateOrderStatusById(id, OrderStatus.Returned);
+    return plainToClass(OrderDto, result);
   }
 }

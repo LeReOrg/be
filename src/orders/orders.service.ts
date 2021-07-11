@@ -23,6 +23,14 @@ import { OrderPopulate } from "./enums/order-populate";
 
 @Injectable()
 export class OrdersService {
+  private __orderPopulate: any[] = [
+    { path: "detail", populate: { path: "product" } },
+    "lessor",
+    "lessorAddress",
+    "lessee",
+    "lesseeAddress",
+  ];
+
   constructor(
     private __ordersRepository: OrdersRepository,
     private __productsRepository: ProductsRepository,
@@ -418,11 +426,30 @@ export class OrdersService {
     }
   }
 
-  public async cancelOrderById(id: any, user: User): Promise<void> {
+  public async cancelOrderById(id: any, user: User): Promise<Order> {
     const order = await this.findOrderDetailById(id);
 
     this.__checkPermissionToCancelOrder(user, order);
 
-    await this.__ordersRepository.updateOne({ _id: order._id }, { status: OrderStatus.Cancelled });
+    return this.__ordersRepository.findByIdAndUpdate(
+      id,
+      { status: OrderStatus.Cancelled },
+      { populate: this.__orderPopulate },
+    );
+  }
+
+  public async updateOrderStatusById(id: any, status: string): Promise<Order> {
+    const order = await this.findOrderDetailById(id);
+    if (
+      (status === OrderStatus.Delivering && order.status !== OrderStatus.AwaitingPickup) ||
+      (status === OrderStatus.Delivered && order.status !== OrderStatus.Delivering) ||
+      (status === OrderStatus.AwaitingReturnPickup && order.status !== OrderStatus.Delivered) ||
+      (status === OrderStatus.Returning && order.status !== OrderStatus.AwaitingReturnPickup) ||
+      (status === OrderStatus.Returned && order.status !== OrderStatus.Returning)
+    ) {
+      throw new ForbiddenException(`Order status is not valid`);
+    }
+    const populate = this.__orderPopulate;
+    return this.__ordersRepository.findByIdAndUpdate(id, { status }, { populate });
   }
 }
