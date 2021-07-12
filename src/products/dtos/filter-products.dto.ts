@@ -59,4 +59,15 @@ export class FilterProductsDto extends PaginatedRequestDto {
   @IsString({ each: true })
   @ApiPropertyOptional({ type: String, description: "Split value by comma" })
   provinces?: string[];
+
+  @Transform((params) => params.value === "true")
+  @IsOptional()
+  @IsBoolean()
+  @ApiPropertyOptional({
+    description:
+      "true: filter available products\n" +
+      "false: filter not available (hired) products\n" +
+      "not provided: (default) retrieve all",
+  })
+  available?: boolean;
 }

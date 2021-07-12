@@ -44,6 +44,7 @@ export class ProductsController {
         wards: input.wards,
         districts: input.districts,
         provinces: input.provinces,
+        available: input.available,
       },
       {
         populate: input.populate,

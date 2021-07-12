@@ -45,6 +45,7 @@ export class UsersService {
         wards: input.wards,
         districts: input.districts,
         provinces: input.provinces,
+        available: input.available,
       },
       {
         limit: input.limit,

@@ -37,6 +37,7 @@ export class ProductsService {
       provinces?: string[];
       categories?: Category[];
       users?: User[];
+      available?: boolean;
     },
     options: {
       limit: number;
@@ -48,8 +49,17 @@ export class ProductsService {
     const conditions: FilterQuery<Product> = {};
 
     if (filters) {
-      const { keyword, priceRange, isTopProduct, wards, districts, provinces, categories, users } =
-        filters;
+      const {
+        keyword,
+        priceRange,
+        isTopProduct,
+        wards,
+        districts,
+        provinces,
+        categories,
+        users,
+        available,
+      } = filters;
 
       if (keyword) {
         conditions.name = { $regex: keyword, $options: "i" };
@@ -86,6 +96,9 @@ export class ProductsService {
       }
       if (users?.length) {
         conditions.user = { $in: users };
+      }
+      if (typeof available === "boolean") {
+        conditions.quantity = available ? { $gte: 1 } : { $eq: 0 };
       }
     }
 
