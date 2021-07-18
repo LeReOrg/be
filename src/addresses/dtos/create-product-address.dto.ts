@@ -3,16 +3,6 @@ import { Type } from "class-transformer";
 import { IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateProductAddressDto {
-  @Type(() => String)
-  @IsString()
-  @ApiProperty()
-  fullName: string;
-
-  @Type(() => String)
-  @IsString()
-  @ApiProperty()
-  phoneNumber: string;
-
   @Type(() => Number)
   @IsOptional()
   @IsNumber()

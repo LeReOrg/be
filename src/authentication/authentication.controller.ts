@@ -20,7 +20,7 @@ import { RegisterAndLoginWithFirebaseRequestBodyDto } from "./dtos/register-logi
 @ApiTags("Authentication")
 @Controller("/authentication")
 export class AuthenticationController {
-  constructor(private __authenticationService: AuthenticationService) {}
+  constructor(private authenticationService: AuthenticationService) {}
 
   @Post("/firebase")
   @ApiOperation({ summary: "Register/login with firebase" })
@@ -30,7 +30,7 @@ export class AuthenticationController {
   public async registerAndLoginWithFirebase(
     @Body() input: RegisterAndLoginWithFirebaseRequestBodyDto,
   ): Promise<LoginResponseBodyDto> {
-    const result = await this.__authenticationService.registerAndLoginWithFirebase(input);
+    const result = await this.authenticationService.registerAndLoginWithFirebase(input);
     return plainToClass(LoginResponseBodyDto, result);
   }
 
@@ -40,7 +40,7 @@ export class AuthenticationController {
   @ApiResponse({ status: 400, description: "Invalid request message" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
   public async register(@Body() input: RegisterRequestBodyDto): Promise<OkResponseBodyDto> {
-    await this.__authenticationService.register(input);
+    await this.authenticationService.register(input);
     return { status: "OK" };
   }
 
@@ -53,7 +53,7 @@ export class AuthenticationController {
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
   public async login(@Request() req): Promise<LoginResponseBodyDto> {
     const user = JSON.parse(JSON.stringify(req.user));
-    const token = await this.__authenticationService.login(req.user);
+    const token = await this.authenticationService.login(req.user);
     return plainToClass(LoginResponseBodyDto, { token, user });
   }
 
@@ -80,7 +80,7 @@ export class AuthenticationController {
     @Request() req,
     @Body() input: ChangePasswordRequestBodyDto,
   ): Promise<OkResponseBodyDto> {
-    await this.__authenticationService.changePassword(input.password, input.newPassword, req.user);
+    await this.authenticationService.changePassword(input.password, input.newPassword, req.user);
     return { status: "OK" };
   }
 
@@ -98,7 +98,7 @@ export class AuthenticationController {
   public async forgotPassword(
     @Body() input: ForgotPasswordRequestBodyDto,
   ): Promise<ForgotPasswordResponseBodyDto> {
-    const token = await this.__authenticationService.forgotPassword(input.email);
+    const token = await this.authenticationService.forgotPassword(input.email);
     return { token };
   }
 
@@ -114,7 +114,7 @@ export class AuthenticationController {
     @Request() req,
     @Body() input: VerifyOtpCodeRequestBodyDto,
   ): Promise<OkResponseBodyDto> {
-    this.__authenticationService.verifyOtpCode(input.otpCode, req.user);
+    this.authenticationService.verifyOtpCode(input.otpCode, req.user);
     return { status: "OK" };
   }
 
@@ -130,7 +130,7 @@ export class AuthenticationController {
     @Request() req,
     @Body() input: ResetPasswordRequestBodyDto,
   ): Promise<UserDto> {
-    const result = await this.__authenticationService.resetPassword(input.password, req.user);
+    const result = await this.authenticationService.resetPassword(input.password, req.user);
     return plainToClass(UserDto, result);
   }
 }

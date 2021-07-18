@@ -1,44 +1,45 @@
 import { Injectable } from "@nestjs/common";
 import { AddressesRepository } from "./addresses.repository";
 import { Address } from "./schemas/address.schema";
-import { CreateProductAddressDto } from "./dtos/create-product-address.dto";
 import { User } from "src/users/schemas/user.schema";
 import { CreateUserAddressDto } from "./dtos/create-user-address.dto";
-import { FilterUserAddressesDto } from "./dtos/filter-user-addresses.dto";
-import { PaginatedDocument } from "src/common/interfaces/paginated-document";
-import { FilterQuery, Schema } from "mongoose";
+import { FilterQuery } from "mongoose";
 
 @Injectable()
 export class AddressesService {
-  constructor(private __addressesRepository: AddressesRepository) {}
+  constructor(private addressesRepository: AddressesRepository) {}
 
-  public async createProductAddress(input: CreateProductAddressDto, user: User): Promise<Address> {
-    return this.__addressesRepository.createOne({ ...input, user });
+  public async createAddress(input: Partial<Address>): Promise<Address> {
+    return this.addressesRepository.createOne(input);
   }
 
-  private async __changeUserDefaultAddress(user: User): Promise<void> {
-    return this.__addressesRepository.updateOne(
+  public async updateAddressById(id: any, update: any): Promise<Address> {
+    return this.addressesRepository.findByIdAndUpdate(id, update);
+  }
+
+  private async changeUserDefaultAddress(user: User): Promise<void> {
+    return this.addressesRepository.updateOne(
       { user, isDefaultAddress: true },
       { isDefaultAddress: false },
     );
   }
 
-  private async __changeUserPickupAddress(user: User): Promise<void> {
-    return this.__addressesRepository.updateOne(
+  private async changeUserPickupAddress(user: User): Promise<void> {
+    return this.addressesRepository.updateOne(
       { user, isPickupAddress: true },
       { isPickupAddress: false },
     );
   }
 
-  private async __changeUserShippingAddress(user: User): Promise<void> {
-    return this.__addressesRepository.updateOne(
+  private async changeUserShippingAddress(user: User): Promise<void> {
+    return this.addressesRepository.updateOne(
       { user, isShippingAddress: true },
       { isShippingAddress: false },
     );
   }
 
   public async createUserAddress(input: CreateUserAddressDto, user: User): Promise<Address> {
-    const existingAddress = await this.__addressesRepository.findOne({ user });
+    const existingAddress = await this.addressesRepository.findOne({ user });
 
     const payload: Partial<Address> = input;
 
@@ -46,13 +47,13 @@ export class AddressesService {
       const tasks: Promise<any>[] = [];
 
       if (input.isDefaultAddress) {
-        tasks.push(this.__changeUserDefaultAddress(user));
+        tasks.push(this.changeUserDefaultAddress(user));
       }
       if (input.isPickupAddress) {
-        tasks.push(this.__changeUserPickupAddress(user));
+        tasks.push(this.changeUserPickupAddress(user));
       }
       if (input.isShippingAddress) {
-        tasks.push(this.__changeUserShippingAddress(user));
+        tasks.push(this.changeUserShippingAddress(user));
       }
 
       await tasks;
@@ -64,7 +65,7 @@ export class AddressesService {
 
     payload.user = user;
 
-    return this.__addressesRepository.createOne(payload);
+    return this.addressesRepository.createOne(payload);
   }
 
   public async filterAddresses(
@@ -99,6 +100,6 @@ export class AddressesService {
       }
     }
 
-    return this.__addressesRepository.paginate(conditions, options);
+    return this.addressesRepository.paginate(conditions, options);
   }
 }

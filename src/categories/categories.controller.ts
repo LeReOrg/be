@@ -13,7 +13,7 @@ import { FilterProductsDto } from "../products/dtos/filter-products.dto";
 @Controller("categories")
 @ApiTags("Categories")
 export class CategoriesController {
-  constructor(private __categoriesService: CategoriesService) {}
+  constructor(private categoriesService: CategoriesService) {}
 
   @Post()
   @ApiOperation({ summary: "Create a category" })
@@ -21,7 +21,7 @@ export class CategoriesController {
   @ApiResponse({ status: 400, description: "Invalid request message" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
   public async createCategory(@Body() input: CreateCategoryDto): Promise<CategoryDto> {
-    const result = await this.__categoriesService.createCategory(input);
+    const result = await this.categoriesService.createCategory(input);
     return plainToClass(CategoryDto, result);
   }
 
@@ -31,7 +31,7 @@ export class CategoriesController {
   @ApiResponse({ status: 422, description: "Duplicate email" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
   public async fetchAll(): Promise<CategoryDto> {
-    const result = await this.__categoriesService.fetchAll();
+    const result = await this.categoriesService.fetchAll();
     return plainToClass(CategoryDto, JSON.parse(JSON.stringify(result)));
   }
 
@@ -41,7 +41,7 @@ export class CategoriesController {
   @ApiResponse({ status: 404, description: "Not found category" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
   public async findByIdOrThrowError(@Param("id") id: string): Promise<CategoryDto> {
-    const result = await this.__categoriesService.findByIdOrThrowError(id);
+    const result = await this.categoriesService.findByIdOrThrowError(id);
     return plainToClass(CategoryDto, result);
   }
 
@@ -54,7 +54,7 @@ export class CategoriesController {
     @Param("id") id: string,
     @Body() input: UpdateCategoryDto,
   ): Promise<CategoryDto> {
-    const result = await this.__categoriesService.updateCategoryById(id, input);
+    const result = await this.categoriesService.updateCategoryById(id, input);
     return plainToClass(CategoryDto, result);
   }
 
@@ -68,7 +68,7 @@ export class CategoriesController {
     @Param("id") id: string,
     @Query() input: FilterProductsDto,
   ): Promise<PaginatedDto<ProductDto>> {
-    const result = await this.__categoriesService.filterProductsByCategoryId(id, input);
+    const result = await this.categoriesService.filterProductsByCategoryId(id, input);
     return plainToClassFromExist(new PaginatedDto<ProductDto>(ProductDto), result);
   }
 }

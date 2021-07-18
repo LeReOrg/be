@@ -23,7 +23,7 @@ import { OrderPopulate } from "./enums/order-populate";
 
 @Injectable()
 export class OrdersService {
-  private __orderPopulate: any[] = [
+  private orderPopulate: any[] = [
     { path: "detail", populate: { path: "product" } },
     "lessor",
     "lessorAddress",
@@ -32,24 +32,24 @@ export class OrdersService {
   ];
 
   constructor(
-    private __ordersRepository: OrdersRepository,
-    private __productsRepository: ProductsRepository,
-    private __addressesRepository: AddressesRepository,
-    private __orderDetailsRepository: OrderDetailsRepository,
+    private ordersRepository: OrdersRepository,
+    private productsRepository: ProductsRepository,
+    private addressesRepository: AddressesRepository,
+    private orderDetailsRepository: OrderDetailsRepository,
   ) {}
 
   // If startDate are same as endDate consider it is a full day
-  private __calculateHiredDays(startDate: Date, endDate: Date): number {
+  private calculateHiredDays(startDate: Date, endDate: Date): number {
     return moment(endDate).diff(startDate, "days") + 1;
   }
 
   // Discounts already sorted by "days" before save to database
-  private __selectProductDiscount(discounts: Discount[], hiredDays: number): Discount | undefined {
+  private selectProductDiscount(discounts: Discount[], hiredDays: number): Discount | undefined {
     const matchedDiscounts = discounts.filter((discount) => hiredDays >= discount.days);
     return matchedDiscounts[matchedDiscounts.length - 1];
   }
 
-  private __calculateOrderAmount(
+  private calculateOrderAmount(
     price: number,
     hiredDays: number,
     quantity: number,
@@ -62,47 +62,50 @@ export class OrdersService {
     return appliedDiscountAmount;
   }
 
-  private __calculateOrderDeposit(unitDeposit: number, quantity: number): number {
+  private calculateOrderDeposit(unitDeposit: number, quantity: number): number {
     return unitDeposit * quantity;
   }
 
-  private __isValidQuantity(orderQuantity: number, productQuantity: number): boolean {
+  private isValidQuantity(orderQuantity: number, productQuantity: number): boolean {
     return orderQuantity <= productQuantity;
   }
 
-  private __isValidStartDateAndEndDate(startDate: Date, endDate: Date): boolean {
+  private isValidStartDateAndEndDate(startDate: Date, endDate: Date): boolean {
     return endDate >= startDate;
   }
 
-  private __isValidHiredDays(hiredDays: number, shortestAllowedHiredDays: number): boolean {
+  private isValidHiredDays(hiredDays: number, shortestAllowedHiredDays: number): boolean {
     return hiredDays >= shortestAllowedHiredDays;
   }
 
-  private __checkOrderQuantity(orderQuantity: number, productQuantity: number): void {
-    const isValidQuantity = this.__isValidQuantity(orderQuantity, productQuantity);
+  private checkOrderQuantity(orderQuantity: number, productQuantity: number): void {
+    const isValidQuantity = this.isValidQuantity(orderQuantity, productQuantity);
 
     if (!isValidQuantity) {
       throw new BadRequestException("Out of stock");
     }
   }
 
-  private __checkOrderStartDateAndEndDate(startDate: Date, endDate: Date): void {
-    const isValidDates = this.__isValidStartDateAndEndDate(startDate, endDate);
+  private checkOrderStartDateAndEndDate(startDate: Date, endDate: Date): void {
+    const isValidDates = this.isValidStartDateAndEndDate(startDate, endDate);
 
     if (!isValidDates) {
       throw new BadRequestException("Invalid startDate/endDate");
     }
   }
 
-  private __checkHiredDays(hiredDays: number, shortestAllowedHiredDays: number): void {
-    const isValidHiredDays = this.__isValidHiredDays(hiredDays, shortestAllowedHiredDays);
+  private checkHiredDays(hiredDays: number, shortestAllowedHiredDays: number): void {
+    const isValidHiredDays = this.isValidHiredDays(hiredDays, shortestAllowedHiredDays);
 
     if (!isValidHiredDays) {
       throw new BadRequestException("Hired days is shorter than product shortest hired days");
     }
   }
 
-  private async __validateCreateOrdersInput(input: CreateOrdersDto): Promise<{
+  private async validateCreateOrdersInput(
+    input: CreateOrdersDto,
+    user: User,
+  ): Promise<{
     products: Product[];
     address: Address;
   }> {
@@ -110,9 +113,16 @@ export class OrdersService {
 
     const productIds = orders.map((order) => order.productId);
 
-    const address = await this.__addressesRepository.findByIdOrThrowException(input.addressId);
+    const address = await this.addressesRepository.findOne({
+      _id: input.addressId,
+      user,
+    });
 
-    const products = await this.__productsRepository.findAll(
+    if (!address) {
+      throw new NotFoundException("Not Found Address");
+    }
+
+    const products = await this.productsRepository.findAll(
       { _id: { $in: productIds } },
       undefined,
       {
@@ -135,42 +145,42 @@ export class OrdersService {
         throw new InternalServerErrorException("Not Found Product Address");
       }
 
-      this.__checkOrderStartDateAndEndDate(startDate, endDate);
+      this.checkOrderStartDateAndEndDate(startDate, endDate);
 
-      const hiredDays = this.__calculateHiredDays(startDate, endDate);
-      this.__checkHiredDays(hiredDays, product.shortestHiredDays);
+      const hiredDays = this.calculateHiredDays(startDate, endDate);
+      this.checkHiredDays(hiredDays, product.shortestHiredDays);
 
-      this.__checkOrderQuantity(quantity, product.quantity);
+      this.checkOrderQuantity(quantity, product.quantity);
     }
 
     return { products, address };
   }
 
   public async createOrders(input: CreateOrdersDto, user: User): Promise<Order[]> {
-    const { products, address } = await this.__validateCreateOrdersInput(input);
+    const { products, address } = await this.validateCreateOrdersInput(input, user);
 
     return Promise.all(
       input.orders.map(async (data) => {
         // Always have value since already checked above
         const product = products.find((item) => item.id === data.productId) as Product;
 
-        const hiredDays = this.__calculateHiredDays(data.startDate, data.endDate);
+        const hiredDays = this.calculateHiredDays(data.startDate, data.endDate);
 
-        const appliedDiscount = this.__selectProductDiscount(product.discounts || [], hiredDays);
+        const appliedDiscount = this.selectProductDiscount(product.discounts || [], hiredDays);
 
-        const amount = this.__calculateOrderAmount(
+        const amount = this.calculateOrderAmount(
           product.price,
           hiredDays,
           data.quantity,
           appliedDiscount?.discount || 0,
         );
 
-        const deposit = this.__calculateOrderDeposit(product.depositPrice, data.quantity);
+        const deposit = this.calculateOrderDeposit(product.depositPrice, data.quantity);
 
         const lessorAddress = product.address;
         const lesseeAddress = address;
 
-        const detail = await this.__orderDetailsRepository.createOne({
+        const detail = await this.orderDetailsRepository.createOne({
           product: product,
           name: product.name,
           quantity: data.quantity,
@@ -180,7 +190,7 @@ export class OrdersService {
           thumbnail: product.images[0],
         });
 
-        return this.__ordersRepository.createOne({
+        return this.ordersRepository.createOne({
           detail,
           lessor: product.user,
           lessee: user,
@@ -237,25 +247,25 @@ export class OrdersService {
       }
     }
 
-    return this.__ordersRepository.paginate(conditions, options);
+    return this.ordersRepository.paginate(conditions, options);
   }
 
-  private __isLesseeOfOrder(user: User, order: Order): boolean {
+  private isLesseeOfOrder(user: User, order: Order): boolean {
     return user.id === order.lessee.id;
   }
 
-  private __isPendingConfirmOrder(status: string): boolean {
+  private isPendingConfirmOrder(status: string): boolean {
     return status === OrderStatus.PendingConfirm;
   }
 
-  private __checkPermissionToUpdatePendingConfirmOrder(user: User, order: Order): void {
-    const isLesseeOfOrder = this.__isLesseeOfOrder(user, order);
+  private checkPermissionToUpdatePendingConfirmOrder(user: User, order: Order): void {
+    const isLesseeOfOrder = this.isLesseeOfOrder(user, order);
 
     if (!isLesseeOfOrder) {
       throw new ForbiddenException("User is not lessee");
     }
 
-    const isPendingConfirmOrder = this.__isPendingConfirmOrder(order.status);
+    const isPendingConfirmOrder = this.isPendingConfirmOrder(order.status);
 
     if (!isPendingConfirmOrder) {
       throw new ForbiddenException(`Can not modify order with status \t"${order.status}"\t`);
@@ -263,7 +273,7 @@ export class OrdersService {
   }
 
   public async findOrderDetailById(id: any): Promise<Order> {
-    return this.__ordersRepository.findByIdOrThrowException(id, undefined, {
+    return this.ordersRepository.findByIdOrThrowException(id, undefined, {
       populate: [
         { path: "detail", populate: { path: "product" } },
         "lessor",
@@ -275,11 +285,11 @@ export class OrdersService {
   }
 
   public async updateOrderById(id: any, input: UpdateOrderDto, user: User): Promise<Order> {
-    const order = await this.__ordersRepository.findByIdOrThrowException(id, undefined, {
+    const order = await this.ordersRepository.findByIdOrThrowException(id, undefined, {
       populate: [{ path: "detail", populate: { path: "product" } }, { path: "lessee" }],
     });
 
-    this.__checkPermissionToUpdatePendingConfirmOrder(user, order);
+    this.checkPermissionToUpdatePendingConfirmOrder(user, order);
 
     const { quantity, startDate, endDate, addressId } = input;
     const { detail } = order;
@@ -289,7 +299,7 @@ export class OrdersService {
     const updatedDetail: Partial<OrderDetail> = {};
 
     if (addressId) {
-      updatedOrder.lesseeAddress = await this.__addressesRepository.findByIdOrThrowException(
+      updatedOrder.lesseeAddress = await this.addressesRepository.findByIdOrThrowException(
         addressId,
       );
     }
@@ -298,22 +308,22 @@ export class OrdersService {
       const calculatedStartDate = startDate || order.startDate;
       const calculatedEndDate = endDate || order.endDate;
 
-      this.__checkOrderStartDateAndEndDate(calculatedStartDate, calculatedEndDate);
+      this.checkOrderStartDateAndEndDate(calculatedStartDate, calculatedEndDate);
 
-      const hiredDays = this.__calculateHiredDays(calculatedStartDate, calculatedEndDate);
-      this.__checkHiredDays(hiredDays, product.shortestHiredDays);
+      const hiredDays = this.calculateHiredDays(calculatedStartDate, calculatedEndDate);
+      this.checkHiredDays(hiredDays, product.shortestHiredDays);
 
       updatedOrder.startDate = calculatedStartDate;
       updatedOrder.endDate = calculatedEndDate;
       updatedOrder.hiredDays = hiredDays;
 
-      updatedDetail.discount = this.__selectProductDiscount(product.discounts || [], hiredDays);
+      updatedDetail.discount = this.selectProductDiscount(product.discounts || [], hiredDays);
     }
 
     if (quantity) {
-      this.__checkOrderQuantity(quantity, product.quantity);
+      this.checkOrderQuantity(quantity, product.quantity);
 
-      updatedOrder.deposit = this.__calculateOrderDeposit(
+      updatedOrder.deposit = this.calculateOrderDeposit(
         detail.unitDeposit,
         quantity || order.detail.quantity,
       );
@@ -324,7 +334,7 @@ export class OrdersService {
     const discountRate =
       startDate || endDate ? updatedDetail.discount?.discount : order.detail.discount?.discount;
 
-    updatedOrder.amount = this.__calculateOrderAmount(
+    updatedOrder.amount = this.calculateOrderAmount(
       product.price,
       updatedOrder.hiredDays || order.hiredDays,
       quantity || order.detail.quantity,
@@ -332,73 +342,80 @@ export class OrdersService {
     );
 
     await Promise.all([
-      this.__orderDetailsRepository.updateOne({ _id: detail._id }, updatedDetail),
-      this.__ordersRepository.updateOne({ _id: order._id }, updatedOrder),
+      this.orderDetailsRepository.updateOne({ _id: detail._id }, updatedDetail),
+      this.ordersRepository.updateOne({ _id: order._id }, updatedOrder),
     ]);
 
     return this.findOrderDetailById(id);
   }
 
-  private __isLessorOfOrder(user: User, order: Order): boolean {
+  private isLessorOfOrder(user: User, order: Order): boolean {
     return user.id === order.lessor.id;
   }
 
-  private __isOutdatedOrder(orderStartDate: Date): boolean {
+  private isOutdatedOrder(orderStartDate: Date): boolean {
     const now = moment();
     const startDate = moment(orderStartDate);
     return startDate.isBefore(now, "day");
   }
 
-  private __checkPermissionToConfirmOrder(user: User, order: Order): void {
-    const isLessorOfOrder = this.__isLessorOfOrder(user, order);
+  private checkPermissionToConfirmOrder(user: User, order: Order): void {
+    const isLessorOfOrder = this.isLessorOfOrder(user, order);
     if (!isLessorOfOrder) {
       throw new ForbiddenException("User is not lessor");
     }
 
-    const isPendingConfirmOrder = this.__isPendingConfirmOrder(order.status);
+    const isPendingConfirmOrder = this.isPendingConfirmOrder(order.status);
     if (!isPendingConfirmOrder) {
       throw new ForbiddenException(`Can only confirm ${OrderStatus.PendingConfirm} order`);
     }
 
-    const isOutDated = this.__isOutdatedOrder(order.startDate);
+    const isOutDated = this.isOutdatedOrder(order.startDate);
     if (isOutDated) {
       throw new ForbiddenException("Order is outdated");
     }
   }
 
-  private async __duplicatedOrderAddress(originalAddress: Address): Promise<Address> {
-    return this.__addressesRepository.createOne({
-      fullName: originalAddress.fullName,
-      phoneNumber: originalAddress.phoneNumber,
-      latitude: originalAddress.latitude,
-      longitude: originalAddress.longitude,
-      street: originalAddress.street,
-      ward: originalAddress.ward,
-      district: originalAddress.district,
-      province: originalAddress.province,
-    });
-  }
-
   public async confirmOrderById(id: any, user: User): Promise<void> {
     const order = await this.findOrderDetailById(id);
 
-    this.__checkPermissionToConfirmOrder(user, order);
+    this.checkPermissionToConfirmOrder(user, order);
 
-    const { detail, lessorAddress, lesseeAddress } = order;
+    const { detail, lessor, lessorAddress, lesseeAddress } = order;
     const { product } = detail;
 
     // Remove unnecessary address info before duplicate
     const [duplicatedLessorAddress, duplicatedLesseeAddress] = await Promise.all([
-      this.__duplicatedOrderAddress(lessorAddress),
-      this.__duplicatedOrderAddress(lesseeAddress),
+      this.addressesRepository.createOne({
+        fullName: lessor.displayName,
+        phoneNumber: lessor.phoneNumber,
+        latitude: lessorAddress.latitude,
+        longitude: lessorAddress.longitude,
+        street: lessorAddress.street,
+        ward: lessorAddress.ward,
+        district: lessorAddress.district,
+        province: lessorAddress.province,
+        order,
+      }),
+      this.addressesRepository.createOne({
+        fullName: lesseeAddress.fullName,
+        phoneNumber: lesseeAddress.phoneNumber,
+        latitude: lesseeAddress.latitude,
+        longitude: lesseeAddress.longitude,
+        street: lesseeAddress.street,
+        ward: lesseeAddress.ward,
+        district: lesseeAddress.district,
+        province: lesseeAddress.province,
+        order,
+      }),
     ]);
 
     await Promise.all([
-      this.__productsRepository.updateOne(
+      this.productsRepository.updateOne(
         { _id: product._id },
         { $inc: { quantity: -detail.quantity } },
       ),
-      this.__ordersRepository.updateOne(
+      this.ordersRepository.updateOne(
         { _id: order._id },
         {
           lessorAddress: duplicatedLessorAddress,
@@ -409,12 +426,12 @@ export class OrdersService {
     ]);
   }
 
-  private __isLessorOrLesseeOfOrder(user: User, order: Order): boolean {
-    return this.__isLessorOfOrder(user, order) || this.__isLesseeOfOrder(user, order);
+  private isLessorOrLesseeOfOrder(user: User, order: Order): boolean {
+    return this.isLessorOfOrder(user, order) || this.isLesseeOfOrder(user, order);
   }
 
-  private __checkPermissionToCancelOrder(user: User, order: Order): void {
-    const isLessorOrLesseeOfOrder = this.__isLessorOrLesseeOfOrder(user, order);
+  private checkPermissionToCancelOrder(user: User, order: Order): void {
+    const isLessorOrLesseeOfOrder = this.isLessorOrLesseeOfOrder(user, order);
     if (!isLessorOrLesseeOfOrder) {
       throw new ForbiddenException("User is not lessor or lessee");
     }
@@ -429,12 +446,12 @@ export class OrdersService {
   public async cancelOrderById(id: any, user: User): Promise<Order> {
     const order = await this.findOrderDetailById(id);
 
-    this.__checkPermissionToCancelOrder(user, order);
+    this.checkPermissionToCancelOrder(user, order);
 
-    return this.__ordersRepository.findByIdAndUpdate(
+    return this.ordersRepository.findByIdAndUpdate(
       id,
       { status: OrderStatus.Cancelled },
-      { populate: this.__orderPopulate },
+      { populate: this.orderPopulate },
     );
   }
 
@@ -449,7 +466,7 @@ export class OrdersService {
     ) {
       throw new ForbiddenException(`Order status is not valid`);
     }
-    const populate = this.__orderPopulate;
-    return this.__ordersRepository.findByIdAndUpdate(id, { status }, { populate });
+    const populate = this.orderPopulate;
+    return this.ordersRepository.findByIdAndUpdate(id, { status }, { populate });
   }
 }

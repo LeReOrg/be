@@ -6,6 +6,7 @@ import {
   IsBoolean,
   IsMongoId,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   Min,
@@ -110,7 +111,7 @@ export class CreateProductDto {
 
   @Type(() => CreateProductAddressDto)
   @ValidateNested()
-  @IsOptional()
-  @ApiPropertyOptional({ type: CreateProductAddressDto })
-  address?: CreateProductAddressDto;
+  @IsObject()
+  @ApiProperty({ type: CreateProductAddressDto })
+  address: CreateProductAddressDto;
 }

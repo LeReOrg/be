@@ -12,25 +12,25 @@ import { ProductsService } from "../products/products.service";
 @Injectable()
 export class CategoriesService {
   constructor(
-    private __categoriesRepository: CategoriesRepository,
-    private __cloudinaryService: CloudinaryService,
-    private __productsService: ProductsService,
+    private categoriesRepository: CategoriesRepository,
+    private cloudinaryService: CloudinaryService,
+    private productsService: ProductsService,
   ) {}
 
   public async fetchAll(): Promise<Category[]> {
-    return this.__categoriesRepository.findAll();
+    return this.categoriesRepository.findAll();
   }
 
   public async createCategory(input: CreateCategoryDto): Promise<Category> {
-    const thumbnail = await this.__cloudinaryService.uploadCategoryImage(input.thumbnail);
-    return this.__categoriesRepository.createOne({
+    const thumbnail = await this.cloudinaryService.uploadCategoryImage(input.thumbnail);
+    return this.categoriesRepository.createOne({
       name: input.name,
       thumbnail,
     });
   }
 
   public async updateCategoryById(id: string, input: UpdateCategoryDto): Promise<Category> {
-    const category = await this.__categoriesRepository.findByIdOrThrowException(id);
+    const category = await this.categoriesRepository.findByIdOrThrowException(id);
 
     const update: Partial<Category> = {};
 
@@ -38,17 +38,17 @@ export class CategoriesService {
       update.name = input.name;
     }
     if (input.thumbnail) {
-      update.thumbnail = await this.__cloudinaryService.uploadCategoryImage(
+      update.thumbnail = await this.cloudinaryService.uploadCategoryImage(
         input.thumbnail,
         category.thumbnail.publicId,
       );
     }
 
-    return this.__categoriesRepository.findByIdAndUpdate(id, update);
+    return this.categoriesRepository.findByIdAndUpdate(id, update);
   }
 
   public async findByIdOrThrowError(id: string): Promise<Category> {
-    return this.__categoriesRepository.findByIdOrThrowException(id);
+    return this.categoriesRepository.findByIdOrThrowException(id);
   }
 
   public async filterProductsByCategoryId(
@@ -57,7 +57,7 @@ export class CategoriesService {
   ): Promise<PaginatedDocument<Product>> {
     const category = await this.findByIdOrThrowError(id);
 
-    return this.__productsService.filterProducts(
+    return this.productsService.filterProducts(
       {
         categories: [category],
         keyword: input.keyword,

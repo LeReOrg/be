@@ -6,7 +6,7 @@ import { BaseModel } from "../common/interfaces/base-model";
 
 @Injectable()
 export class OrdersRepository extends BaseRepository<OrderDocument> {
-  constructor(@InjectModel(Order.name) private __orderModel: BaseModel<OrderDocument>) {
-    super(__orderModel);
+  constructor(@InjectModel(Order.name) private orderModel: BaseModel<OrderDocument>) {
+    super(orderModel);
   }
 }

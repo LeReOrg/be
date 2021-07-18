@@ -7,8 +7,8 @@ import { BaseModel } from "../common/interfaces/base-model";
 @Injectable()
 export class OrderDetailsRepository extends BaseRepository<OrderDetailDocument> {
   constructor(
-    @InjectModel(OrderDetail.name) private __orderDetailModel: BaseModel<OrderDetailDocument>,
+    @InjectModel(OrderDetail.name) private orderDetailModel: BaseModel<OrderDetailDocument>,
   ) {
-    super(__orderDetailModel);
+    super(orderDetailModel);
   }
 }

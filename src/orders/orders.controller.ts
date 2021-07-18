@@ -25,7 +25,7 @@ import { OkResponseBodyDto } from "../common/dtos/ok.response.dto";
 @Controller("/orders")
 @ApiTags("Orders")
 export class OrdersController {
-  constructor(private __ordersService: OrdersService) {}
+  constructor(private ordersService: OrdersService) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -43,7 +43,7 @@ export class OrdersController {
   @ApiResponse({ status: 404, description: "Not found product | address" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
   public async createOrders(@Request() req, @Body() input: CreateOrdersDto): Promise<OrderDto[]> {
-    const result = await this.__ordersService.createOrders(input, req.user);
+    const result = await this.ordersService.createOrders(input, req.user);
     return plainToClass(OrderDto, result);
   }
 
@@ -54,7 +54,7 @@ export class OrdersController {
   @ApiResponse({ status: 400, description: "Invalid request message" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
   public async filterOrders(@Query() input: FilterOrdersDto): Promise<PaginatedDto<OrderDto>> {
-    const result = await this.__ordersService.filterOrders(
+    const result = await this.ordersService.filterOrders(
       {
         lessorId: input.lessorId,
         lesseeId: input.lesseeId,
@@ -76,7 +76,7 @@ export class OrdersController {
   @ApiResponse({ status: 404, description: "Not Found Order" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
   public async findOrderDetailById(@Param("id") id: string): Promise<OrderDto> {
-    const result = await this.__ordersService.findOrderDetailById(id);
+    const result = await this.ordersService.findOrderDetailById(id);
     return plainToClass(OrderDto, result);
   }
 
@@ -107,7 +107,7 @@ export class OrdersController {
     @Param("id") id: string,
     @Body() input: UpdateOrderDto,
   ): Promise<OrderDto> {
-    const result = await this.__ordersService.updateOrderById(id, input, req.user);
+    const result = await this.ordersService.updateOrderById(id, input, req.user);
     return plainToClass(OrderDto, result);
   }
 
@@ -130,7 +130,7 @@ export class OrdersController {
   @ApiResponse({ status: 404, description: "Not found order" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
   public async confirmOrderById(@Request() req, @Param("id") id: string) {
-    await this.__ordersService.confirmOrderById(id, req.user);
+    await this.ordersService.confirmOrderById(id, req.user);
     return { status: "OK" };
   }
 
@@ -150,7 +150,7 @@ export class OrdersController {
   @ApiResponse({ status: 404, description: "Not found order" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
   public async cancelOrderById(@Request() req, @Param("id") id: string): Promise<OrderDto> {
-    const result = await this.__ordersService.cancelOrderById(id, req.user);
+    const result = await this.ordersService.cancelOrderById(id, req.user);
     return plainToClass(OrderDto, result);
   }
 
@@ -170,7 +170,7 @@ export class OrdersController {
   @ApiResponse({ status: 404, description: "Not found order" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
   public async deliveryOrderById(@Request() req, @Param("id") id: string): Promise<OrderDto> {
-    const result = await this.__ordersService.updateOrderStatusById(id, OrderStatus.Delivering);
+    const result = await this.ordersService.updateOrderStatusById(id, OrderStatus.Delivering);
     return plainToClass(OrderDto, result);
   }
 
@@ -190,7 +190,7 @@ export class OrdersController {
   @ApiResponse({ status: 404, description: "Not found order" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
   public async receiveOrderById(@Request() req, @Param("id") id: string): Promise<OrderDto> {
-    const result = await this.__ordersService.updateOrderStatusById(id, OrderStatus.Delivered);
+    const result = await this.ordersService.updateOrderStatusById(id, OrderStatus.Delivered);
     return plainToClass(OrderDto, result);
   }
 
@@ -210,7 +210,7 @@ export class OrdersController {
   @ApiResponse({ status: 404, description: "Not found order" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
   public async waitForReturnOrderById(@Request() req, @Param("id") id: string): Promise<OrderDto> {
-    const result = await this.__ordersService.updateOrderStatusById(
+    const result = await this.ordersService.updateOrderStatusById(
       id,
       OrderStatus.AwaitingReturnPickup,
     );
@@ -233,7 +233,7 @@ export class OrdersController {
   @ApiResponse({ status: 404, description: "Not found order" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
   public async returnOrderProductById(@Request() req, @Param("id") id: string): Promise<OrderDto> {
-    const result = await this.__ordersService.updateOrderStatusById(id, OrderStatus.Returning);
+    const result = await this.ordersService.updateOrderStatusById(id, OrderStatus.Returning);
     return plainToClass(OrderDto, result);
   }
 
@@ -256,7 +256,7 @@ export class OrdersController {
     @Request() req,
     @Param("id") id: string,
   ): Promise<OrderDto> {
-    const result = await this.__ordersService.updateOrderStatusById(id, OrderStatus.Returned);
+    const result = await this.ordersService.updateOrderStatusById(id, OrderStatus.Returned);
     return plainToClass(OrderDto, result);
   }
 }

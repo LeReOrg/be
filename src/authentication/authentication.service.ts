@@ -20,22 +20,22 @@ import { RegisterAndLoginWithFirebaseRequestBodyDto } from "./dtos/register-logi
 @Injectable()
 export class AuthenticationService {
   constructor(
-    private __usersRepository: UsersRepository,
-    private __jwtService: JwtService,
-    private __configService: ConfigService,
-    private __mailNotificationService: MailNotificationService,
+    private usersRepository: UsersRepository,
+    private jwtService: JwtService,
+    private configService: ConfigService,
+    private mailNotificationService: MailNotificationService,
   ) {}
 
-  private __generateSalt(): string {
+  private generateSalt(): string {
     return crypto.randomBytes(8).toString("hex").slice(0, 16);
   }
 
-  private __hashPassword(password: string, salt: string): string {
+  private hashPassword(password: string, salt: string): string {
     return crypto.createHmac("sha512", salt).update(password).digest("hex");
   }
 
-  private async __validateRegisterInput(input: RegisterRequestBodyDto): Promise<void> {
-    const userWithSameEmail = await this.__usersRepository.findOne({ email: input.email });
+  private async validateRegisterInput(input: RegisterRequestBodyDto): Promise<void> {
+    const userWithSameEmail = await this.usersRepository.findOne({ email: input.email });
 
     if (userWithSameEmail) {
       throw new BadRequestException("Duplicated Email");
@@ -43,12 +43,12 @@ export class AuthenticationService {
   }
 
   public async register(input: RegisterRequestBodyDto): Promise<User> {
-    await this.__validateRegisterInput(input);
+    await this.validateRegisterInput(input);
 
-    const salt = this.__generateSalt();
-    const hash = this.__hashPassword(input.password, salt);
+    const salt = this.generateSalt();
+    const hash = this.hashPassword(input.password, salt);
 
-    return this.__usersRepository.createOne({
+    return this.usersRepository.createOne({
       email: input.email,
       displayName: input.displayName,
       phoneNumber: input.phoneNumber,
@@ -57,13 +57,13 @@ export class AuthenticationService {
     });
   }
 
-  private __isMatchPassword(password: string, user: User): boolean {
-    const hashPassword = this.__hashPassword(password, user.salt);
+  private isMatchPassword(password: string, user: User): boolean {
+    const hashPassword = this.hashPassword(password, user.salt);
     return hashPassword === user.hash;
   }
 
   public async validateLoginInput(input: LoginRequestBodyDto): Promise<User> {
-    const user = await this.__usersRepository.findOne({ email: input.email });
+    const user = await this.usersRepository.findOne({ email: input.email });
 
     if (!user) {
       throw new BadRequestException("Invalid email");
@@ -75,7 +75,7 @@ export class AuthenticationService {
       );
     }
 
-    const isMatchPassword = this.__isMatchPassword(input.password, user);
+    const isMatchPassword = this.isMatchPassword(input.password, user);
 
     if (!isMatchPassword) {
       throw new BadRequestException("Invalid password");
@@ -86,11 +86,11 @@ export class AuthenticationService {
 
   public async login(user: User): Promise<string> {
     const payload = { email: user.email };
-    return this.__jwtService.signAsync(payload);
+    return this.jwtService.signAsync(payload);
   }
 
   public async validateTokenPayload(payload: { email: string }): Promise<User> {
-    const user = await this.__usersRepository.findOne({ email: payload.email });
+    const user = await this.usersRepository.findOne({ email: payload.email });
 
     if (!user) {
       throw new UnauthorizedException("Invalid token");
@@ -100,20 +100,20 @@ export class AuthenticationService {
   }
 
   public async changePassword(oldPassword: string, newPassword: string, user: User): Promise<void> {
-    const isMatchPassword = this.__isMatchPassword(oldPassword, user);
+    const isMatchPassword = this.isMatchPassword(oldPassword, user);
 
     if (!isMatchPassword) {
       throw new BadRequestException("Invalid password");
     }
 
     const salt = user.salt;
-    const hash = this.__hashPassword(newPassword, salt);
+    const hash = this.hashPassword(newPassword, salt);
 
-    return this.__usersRepository.updateOne({ _id: user._id }, { $set: { hash } });
+    return this.usersRepository.updateOne({ _id: user._id }, { $set: { hash } });
   }
 
   public async forgotPassword(email: string): Promise<string> {
-    const user = await this.__usersRepository.findOne({ email });
+    const user = await this.usersRepository.findOne({ email });
 
     if (user && user.uid) {
       throw new ForbiddenException(
@@ -121,19 +121,17 @@ export class AuthenticationService {
       );
     }
 
-    const jwtSecretKey = this.__configService.get<string>("jwt.resetPasswordSecretKey");
+    const jwtSecretKey = this.configService.get<string>("jwt.resetPasswordSecretKey");
 
     const otpCode = UtilsHelper.generateRandomString(6, { numericDigits: true });
 
-    this.__mailNotificationService.sendForgotPasswordEmail(email, otpCode);
+    this.mailNotificationService.sendForgotPasswordEmail(email, otpCode);
 
-    await this.__usersRepository
-      .updateOne({ email }, { "otp.resetPassword": otpCode })
-      .catch(() => {
-        console.log("Not Found User", email);
-      });
+    await this.usersRepository.updateOne({ email }, { "otp.resetPassword": otpCode }).catch(() => {
+      console.log("Not Found User", email);
+    });
 
-    return this.__jwtService.signAsync({ email }, { secret: jwtSecretKey, expiresIn: 5 * 60 });
+    return this.jwtService.signAsync({ email }, { secret: jwtSecretKey, expiresIn: 5 * 60 });
   }
 
   public verifyOtpCode(otpCode: string, user: User): void {
@@ -146,8 +144,8 @@ export class AuthenticationService {
 
   public async resetPassword(password: string, user: User): Promise<User> {
     const salt = user.salt;
-    const hash = this.__hashPassword(password, salt);
-    return this.__usersRepository.findByIdAndUpdate(user._id, {
+    const hash = this.hashPassword(password, salt);
+    return this.usersRepository.findByIdAndUpdate(user._id, {
       $set: { hash },
       $unset: { "otp.resetPassword": "" },
     });
@@ -156,7 +154,7 @@ export class AuthenticationService {
   public async registerAndLoginWithFirebase(
     input: RegisterAndLoginWithFirebaseRequestBodyDto,
   ): Promise<{ token: string; user: User }> {
-    const userWithSameEmail = await this.__usersRepository.findOne({
+    const userWithSameEmail = await this.usersRepository.findOne({
       email: input.email,
       uid: { $ne: input.uid },
     });
@@ -165,7 +163,7 @@ export class AuthenticationService {
       throw new UnprocessableEntityException("Duplicate email");
     }
 
-    const user = await this.__usersRepository.upsertOne(
+    const user = await this.usersRepository.upsertOne(
       { email: input.email },
       {
         uid: input.uid,

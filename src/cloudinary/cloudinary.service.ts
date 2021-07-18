@@ -6,12 +6,12 @@ import { CloudinaryConfig } from "../config/interfaces/cloudinary.config";
 
 @Injectable()
 export class CloudinaryService {
-  constructor(private __configService: ConfigService) {
-    this.__setConfig();
+  constructor(private configService: ConfigService) {
+    this.setConfig();
   }
 
-  private __setConfig(): void {
-    const config = this.__configService.get<CloudinaryConfig>("cloudinary");
+  private setConfig(): void {
+    const config = this.configService.get<CloudinaryConfig>("cloudinary");
 
     cloudinary.config({
       cloud_name: config?.cloudName,
@@ -27,7 +27,7 @@ export class CloudinaryService {
       publicId?: string;
     },
   ): Promise<CloudinaryImage> {
-    const env = this.__configService.get<string>("environment");
+    const env = this.configService.get<string>("environment");
 
     const finalOptions: {
       folder: string;

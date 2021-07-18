@@ -12,7 +12,7 @@ import { ApiPaginatedResponse } from "../common/decorators/api-paginated-respons
 @Controller("/users/addresses")
 @ApiTags("User Addresses")
 export class UserAddressesController {
-  constructor(private __addressesService: AddressesService) {}
+  constructor(private addressesService: AddressesService) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -25,7 +25,7 @@ export class UserAddressesController {
     @Request() req: any,
     @Body() input: CreateUserAddressDto,
   ): Promise<AddressDto> {
-    const result = await this.__addressesService.createUserAddress(input, req.user);
+    const result = await this.addressesService.createUserAddress(input, req.user);
     return plainToClass(AddressDto, result);
   }
 
@@ -40,7 +40,7 @@ export class UserAddressesController {
     @Request() req: any,
     @Query() input: FilterUserAddressesDto,
   ): Promise<PaginatedDto<AddressDto>> {
-    const result = await this.__addressesService.filterAddresses(
+    const result = await this.addressesService.filterAddresses(
       {
         wards: input.wards,
         districts: input.districts,

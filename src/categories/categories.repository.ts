@@ -6,7 +6,7 @@ import { BaseModel } from "../common/interfaces/base-model";
 
 @Injectable()
 export class CategoriesRepository extends BaseRepository<CategoryDocument> {
-  constructor(@InjectModel(Category.name) private __categoryModel: BaseModel<CategoryDocument>) {
-    super(__categoryModel);
+  constructor(@InjectModel(Category.name) private categoryModel: BaseModel<CategoryDocument>) {
+    super(categoryModel);
   }
 }

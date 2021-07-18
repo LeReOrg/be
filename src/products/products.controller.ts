@@ -12,7 +12,7 @@ import { FilterProductsDto } from "./dtos/filter-products.dto";
 @Controller("/products")
 @ApiTags("Products")
 export class ProductsController {
-  constructor(private __productsService: ProductsService) {}
+  constructor(private productsService: ProductsService) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -23,7 +23,7 @@ export class ProductsController {
   @ApiResponse({ status: 404, description: "Not Found Category" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
   public async createProduct(@Request() req, @Body() input: CreateProductDto): Promise<ProductDto> {
-    const result = await this.__productsService.createProduct(input, req.user);
+    const result = await this.productsService.createProduct(input, req.user);
     return plainToClass(ProductDto, result);
   }
 
@@ -36,7 +36,7 @@ export class ProductsController {
   public async filterProductsDto(
     @Query() input: FilterProductsDto,
   ): Promise<PaginatedDto<ProductDto>> {
-    const result = await this.__productsService.filterProducts(
+    const result = await this.productsService.filterProducts(
       {
         keyword: input.keyword,
         priceRange: input.priceRange,
@@ -63,7 +63,7 @@ export class ProductsController {
   @ApiResponse({ status: 404, description: "Not Found Product" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
   public async findProductDetailById(@Param("id") id: string): Promise<ProductDto> {
-    const result = await this.__productsService.findProductDetailById(id);
+    const result = await this.productsService.findProductDetailById(id);
     return plainToClass(ProductDto, result);
   }
 }

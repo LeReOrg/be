@@ -10,23 +10,23 @@ import { SentMessageInfo } from "nodemailer/lib/smtp-transport";
 
 @Injectable()
 export class MailNotificationService {
-  private __config: MailConfig;
-  private __transporter: Mail<SentMessageInfo>;
-  private __templates: Partial<MailTemplates> = {};
+  private config: MailConfig;
+  private transporter: Mail<SentMessageInfo>;
+  private templates: Partial<MailTemplates> = {};
 
-  constructor(private __configService: ConfigService) {
-    const config = __configService.get<MailConfig>("mail");
+  constructor(private configService: ConfigService) {
+    const config = configService.get<MailConfig>("mail");
 
     if (!config) {
       throw new InternalServerErrorException("Not found config");
     }
 
-    this.__config = config;
-    this.__initializeTemplates();
+    this.config = config;
+    this.initializeTemplates();
     this.createTransport(config);
   }
 
-  private __getTemplateContent(relativePath: string): Promise<string> {
+  private getTemplateContent(relativePath: string): Promise<string> {
     return new Promise((resolve, reject) => {
       const filePath = `${__dirname}/../../${relativePath}`;
 
@@ -40,14 +40,14 @@ export class MailNotificationService {
     });
   }
 
-  private async __initializeTemplates(): Promise<void> {
-    const templates = await Promise.all([this.__getTemplateContent(TemplatePaths.ForgotPassword)]);
-    this.__templates.forgotPassword = templates[0];
+  private async initializeTemplates(): Promise<void> {
+    const templates = await Promise.all([this.getTemplateContent(TemplatePaths.ForgotPassword)]);
+    this.templates.forgotPassword = templates[0];
   }
 
   // Public this method for easy to write unit test
   public createTransport(config: MailConfig): void {
-    this.__transporter = nodemailer.createTransport({
+    this.transporter = nodemailer.createTransport({
       service: config.service,
       auth: {
         user: config.username,
@@ -58,7 +58,7 @@ export class MailNotificationService {
 
   public sendMail = (options: Mail.Options): Promise<SentMessageInfo> => {
     return new Promise((resolve, reject) => {
-      this.__transporter.sendMail(options, (err, info) => {
+      this.transporter.sendMail(options, (err, info) => {
         if (err) reject(err);
         resolve(info);
       });
@@ -67,10 +67,10 @@ export class MailNotificationService {
 
   public sendForgotPasswordEmail(receiverEmail: string, otpCode: string): void {
     this.sendMail({
-      from: this.__config.username,
+      from: this.config.username,
       to: receiverEmail,
       subject: "[No-reply] Reset your password",
-      html: this.__templates.forgotPassword?.replace("{{code}}", otpCode),
+      html: this.templates.forgotPassword?.replace("{{code}}", otpCode),
     });
   }
 }

@@ -20,11 +20,11 @@ import { Address } from "../addresses/schemas/address.schema";
 @Injectable()
 export class ProductsService {
   constructor(
-    private __productsRepository: ProductsRepository,
-    private __categoriesRepository: CategoriesRepository,
-    private __cloudinaryService: CloudinaryService,
-    private __addressesService: AddressesService,
-    private __addressesRepository: AddressesRepository,
+    private productsRepository: ProductsRepository,
+    private categoriesRepository: CategoriesRepository,
+    private cloudinaryService: CloudinaryService,
+    private addressesService: AddressesService,
+    private addressesRepository: AddressesRepository,
   ) {}
 
   public async filterProducts(
@@ -87,7 +87,7 @@ export class ProductsService {
           addressesConditions.province = { $in: provinces };
         }
 
-        const addresses = await this.__addressesRepository.findAll(addressesConditions);
+        const addresses = await this.addressesRepository.findAll(addressesConditions);
 
         conditions.address = { $in: addresses };
       }
@@ -103,7 +103,7 @@ export class ProductsService {
     }
 
     // TODO: Using aggregation
-    return this.__productsRepository.paginate(conditions, {
+    return this.productsRepository.paginate(conditions, {
       ...options,
       projection: {
         images: { $slice: 1 },
@@ -112,12 +112,12 @@ export class ProductsService {
   }
 
   public async findProductDetailById(id: string): Promise<Product> {
-    return this.__productsRepository.findByIdOrThrowException(id, undefined, {
+    return this.productsRepository.findByIdOrThrowException(id, undefined, {
       populate: ["user", "category", "address"],
     });
   }
 
-  private async __uploadProductImages(
+  private async uploadProductImages(
     input: UploadProductImageDto[],
     productId: string,
   ): Promise<CloudinaryImage[]> {
@@ -125,7 +125,7 @@ export class ProductsService {
       input.map(async (item, index) => {
         const { base64, isLandingImage } = item;
         const order = isLandingImage ? 0 : index + 1;
-        const uploadedImage = await this.__cloudinaryService.uploadProductImage(productId, base64);
+        const uploadedImage = await this.cloudinaryService.uploadProductImage(productId, base64);
         return { order, ...uploadedImage };
       }),
     );
@@ -137,7 +137,7 @@ export class ProductsService {
     return images.map(({ order, ...image }) => image);
   }
 
-  private __sortProductDiscounts(input: Discount[]): Discount[] {
+  private sortProductDiscounts(input: Discount[]): Discount[] {
     // Only work if not use Dates, functions, undefined, Infinity, RegExps, Maps, Sets, Blobs,
     // FileLists, ImageDatas, sparse Arrays, Typed Arrays or other complex types within object
     const deepClonedInput = JSON.parse(JSON.stringify(input));
@@ -147,7 +147,7 @@ export class ProductsService {
     return deepClonedInput;
   }
 
-  private async __validateCreateProductInput(input: CreateProductDto) {
+  private async validateCreateProductInput(input: CreateProductDto) {
     const setOfCategoryIds: Set<string> = new Set();
 
     setOfCategoryIds.add(input.categoryId);
@@ -161,7 +161,7 @@ export class ProductsService {
     // No duplicated
     const categoryIds = [...setOfCategoryIds];
 
-    const categories = await this.__categoriesRepository.findAll(
+    const categories = await this.categoriesRepository.findAll(
       { _id: { $in: categoryIds } },
       { _id: 1 },
     );
@@ -173,7 +173,7 @@ export class ProductsService {
     return categories;
   }
 
-  private __formatBreadcrumbsDtoToSchema(
+  private formatBreadcrumbsDtoToSchema(
     input: BreadcrumbDto[],
     categories: Category[],
   ): Breadcrumb[] {
@@ -193,7 +193,7 @@ export class ProductsService {
   }
 
   public async createProduct(input: CreateProductDto, user: User): Promise<Product> {
-    const categories = await this.__validateCreateProductInput(input);
+    const categories = await this.validateCreateProductInput(input);
 
     const category = categories.find((category) => category.id === input.categoryId);
 
@@ -213,31 +213,25 @@ export class ProductsService {
     };
 
     if (input.breadcrumbs) {
-      payload.breadcrumbs = this.__formatBreadcrumbsDtoToSchema(input.breadcrumbs, categories);
+      payload.breadcrumbs = this.formatBreadcrumbsDtoToSchema(input.breadcrumbs, categories);
     }
     if (input.discounts) {
-      payload.discounts = this.__sortProductDiscounts(input.discounts);
-    }
-    if (input.address) {
-      payload.address = await this.__addressesService.createProductAddress(input.address, user);
-    } else {
-      const userAddress = await this.__addressesRepository.findOne({ user, isPickupAddress: true });
-
-      if (!userAddress) {
-        throw new BadRequestException("Missing User Pickup Address");
-      }
-
-      payload.address = userAddress;
+      payload.discounts = this.sortProductDiscounts(input.discounts);
     }
 
-    const product = await this.__productsRepository.createOne(payload);
+    payload.address = await this.addressesService.createAddress(input.address);
 
-    const images = await this.__uploadProductImages(input.images, product.id);
+    const product = await this.productsRepository.createOne(payload);
 
-    return this.__productsRepository.findByIdAndUpdate(
+    const [images] = await Promise.all([
+      this.uploadProductImages(input.images, product.id),
+      this.addressesService.updateAddressById(payload.address._id, { product }),
+    ]);
+
+    return this.productsRepository.findByIdAndUpdate(
       product.id,
       { images },
-      { populate: ["category", "address"] },
+      { populate: ["user", "category", "address"] },
     );
   }
 }
