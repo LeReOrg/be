@@ -1,7 +1,8 @@
 import { LoginRequestBodyDto } from "./login.request.dto";
-import { IsString, Matches } from "class-validator";
+import { IsEnum, IsOptional, IsString, Matches } from "class-validator";
 import { Transform, Type } from "class-transformer";
 import { ApiProperty } from "@nestjs/swagger";
+import { Role } from "../../users/enums/role.enum";
 
 export class RegisterRequestBodyDto extends LoginRequestBodyDto {
   @IsString()
@@ -24,4 +25,17 @@ export class RegisterRequestBodyDto extends LoginRequestBodyDto {
     required: false,
   })
   phoneNumber: string;
+
+  @IsOptional()
+  @IsString()
+  @IsEnum(Role)
+  @Type(() => String)
+  @Transform((param) => param.value.trim())
+  @ApiProperty({
+    description: "Role",
+    example: "Admin",
+    required: false,
+    enum: Role,
+  })
+  role?: string;
 }

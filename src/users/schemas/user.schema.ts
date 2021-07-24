@@ -43,6 +43,9 @@ export class User {
     }),
   )
   otp: Record<string, any>;
+
+  @Prop()
+  role?: string;
 }
 
 export type UserDocument = User & Document;

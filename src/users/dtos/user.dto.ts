@@ -40,6 +40,10 @@ export class UserDto {
   isHirer: boolean;
 
   @Expose()
+  @ApiResponseProperty({ example: "DRIVER" })
+  role: string;
+
+  @Expose()
   @ApiResponseProperty({ example: "2021-06-02T07:53:00.865Z" })
   createdAt: Date;
 

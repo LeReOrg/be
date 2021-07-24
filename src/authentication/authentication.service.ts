@@ -54,6 +54,7 @@ export class AuthenticationService {
       email: input.email,
       displayName: input.displayName,
       phoneNumber: input.phoneNumber,
+      role: input.role,
       salt,
       hash,
     });
