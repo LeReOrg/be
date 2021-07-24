@@ -9,6 +9,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtStrategy } from "./strategies/jwt.strategy";
 import { NotificationModule } from "../notification/notification.module";
 import { JwtResetPasswordStrategy } from "./strategies/jwt-reset-password.strategy";
+import { BalancesModule } from "../balances/balances.module";
 
 /**
  * The secret key in JwtStrategy was used to decode
@@ -27,6 +28,7 @@ import { JwtResetPasswordStrategy } from "./strategies/jwt-reset-password.strate
       }),
     }),
     NotificationModule,
+    BalancesModule,
   ],
   controllers: [AuthenticationController],
   providers: [AuthenticationService, LocalStrategy, JwtStrategy, JwtResetPasswordStrategy],

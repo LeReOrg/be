@@ -8,6 +8,9 @@ import { OrdersController } from "./orders.controller";
 import { ProductsModule } from "../products/products.module";
 import { AddressesModule } from "../addresses/addresses.module";
 import { OrderDetailsModule } from "../order-details/order-details.module";
+import { IncomesModule } from "../incomes/incomes.module";
+import { IncomeMonthlyModule } from "../income-monthly/income-monthly.module";
+import { BalancesModule } from "../balances/balances.module";
 
 @Module({
   imports: [
@@ -24,6 +27,9 @@ import { OrderDetailsModule } from "../order-details/order-details.module";
     forwardRef(() => ProductsModule),
     forwardRef(() => AddressesModule),
     OrderDetailsModule,
+    IncomesModule,
+    IncomeMonthlyModule,
+    BalancesModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersRepository, OrdersService],

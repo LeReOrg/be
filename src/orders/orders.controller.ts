@@ -141,7 +141,7 @@ export class OrdersController {
     description: `Order status will be change from ${OrderStatus.PendingConfirm} to ${OrderStatus.Cancelled}`,
   })
   @ApiBearerAuth()
-  @ApiResponse({ status: 200, type: OrderDto })
+  @ApiResponse({ status: 200, type: OkResponseBodyDto })
   @ApiResponse({ status: 400, description: "Invalid request message" })
   @ApiResponse({
     status: 403,
@@ -149,9 +149,9 @@ export class OrdersController {
   })
   @ApiResponse({ status: 404, description: "Not found order" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
-  public async cancelOrderById(@Request() req, @Param("id") id: string): Promise<OrderDto> {
-    const result = await this.ordersService.cancelOrderById(id, req.user);
-    return plainToClass(OrderDto, result);
+  public async cancelOrderById(@Request() req, @Param("id") id: string) {
+    await this.ordersService.cancelOrderById(id, req.user);
+    return { status: "OK" };
   }
 
   @Post("/:id/delivery")
@@ -161,7 +161,7 @@ export class OrdersController {
     description: `Order status will be change from ${OrderStatus.AwaitingPickup} to ${OrderStatus.Delivering}`,
   })
   @ApiBearerAuth()
-  @ApiResponse({ status: 200, type: OrderDto })
+  @ApiResponse({ status: 200, type: OkResponseBodyDto })
   @ApiResponse({ status: 400, description: "Invalid request message" })
   @ApiResponse({
     status: 403,
@@ -169,9 +169,9 @@ export class OrdersController {
   })
   @ApiResponse({ status: 404, description: "Not found order" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
-  public async deliveryOrderById(@Request() req, @Param("id") id: string): Promise<OrderDto> {
-    const result = await this.ordersService.updateOrderStatusById(id, OrderStatus.Delivering);
-    return plainToClass(OrderDto, result);
+  public async deliveryOrderById(@Request() req, @Param("id") id: string) {
+    await this.ordersService.deliveryOrderById(id);
+    return { status: "OK" };
   }
 
   @Post("/:id/receive")
@@ -181,7 +181,7 @@ export class OrdersController {
     description: `Order status will be change from ${OrderStatus.Delivering} to ${OrderStatus.Delivered}`,
   })
   @ApiBearerAuth()
-  @ApiResponse({ status: 200, type: OrderDto })
+  @ApiResponse({ status: 200, type: OkResponseBodyDto })
   @ApiResponse({ status: 400, description: "Invalid request message" })
   @ApiResponse({
     status: 403,
@@ -189,9 +189,9 @@ export class OrdersController {
   })
   @ApiResponse({ status: 404, description: "Not found order" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
-  public async receiveOrderById(@Request() req, @Param("id") id: string): Promise<OrderDto> {
-    const result = await this.ordersService.updateOrderStatusById(id, OrderStatus.Delivered);
-    return plainToClass(OrderDto, result);
+  public async receiveOrderById(@Request() req, @Param("id") id: string) {
+    await this.ordersService.updateOrderStatusById(id, OrderStatus.Delivered);
+    return { status: "OK" };
   }
 
   @Post("/:id/wait-return")
@@ -201,7 +201,7 @@ export class OrdersController {
     description: `Order status will be change from ${OrderStatus.Delivered} to ${OrderStatus.AwaitingReturnPickup}`,
   })
   @ApiBearerAuth()
-  @ApiResponse({ status: 200, type: OrderDto })
+  @ApiResponse({ status: 200, type: OkResponseBodyDto })
   @ApiResponse({ status: 400, description: "Invalid request message" })
   @ApiResponse({
     status: 403,
@@ -209,12 +209,9 @@ export class OrdersController {
   })
   @ApiResponse({ status: 404, description: "Not found order" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
-  public async waitForReturnOrderById(@Request() req, @Param("id") id: string): Promise<OrderDto> {
-    const result = await this.ordersService.updateOrderStatusById(
-      id,
-      OrderStatus.AwaitingReturnPickup,
-    );
-    return plainToClass(OrderDto, result);
+  public async waitForReturnOrderById(@Request() req, @Param("id") id: string) {
+    await this.ordersService.updateOrderStatusById(id, OrderStatus.AwaitingReturnPickup);
+    return { status: "OK" };
   }
 
   @Post("/:id/return")
@@ -224,7 +221,7 @@ export class OrdersController {
     description: `Order status will be change from ${OrderStatus.AwaitingPickup} to ${OrderStatus.Returning}`,
   })
   @ApiBearerAuth()
-  @ApiResponse({ status: 200, type: OrderDto })
+  @ApiResponse({ status: 200, type: OkResponseBodyDto })
   @ApiResponse({ status: 400, description: "Invalid request message" })
   @ApiResponse({
     status: 403,
@@ -232,9 +229,9 @@ export class OrdersController {
   })
   @ApiResponse({ status: 404, description: "Not found order" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
-  public async returnOrderProductById(@Request() req, @Param("id") id: string): Promise<OrderDto> {
-    const result = await this.ordersService.updateOrderStatusById(id, OrderStatus.Returning);
-    return plainToClass(OrderDto, result);
+  public async returnOrderProductById(@Request() req, @Param("id") id: string) {
+    await this.ordersService.updateOrderStatusById(id, OrderStatus.Returning);
+    return { status: "OK" };
   }
 
   @Post("/:id/confirm-returned")
@@ -244,7 +241,7 @@ export class OrdersController {
     description: `Order status will be change from ${OrderStatus.Returning} to ${OrderStatus.Returned}`,
   })
   @ApiBearerAuth()
-  @ApiResponse({ status: 200, type: OrderDto })
+  @ApiResponse({ status: 200, type: OkResponseBodyDto })
   @ApiResponse({ status: 400, description: "Invalid request message" })
   @ApiResponse({
     status: 403,
@@ -252,11 +249,8 @@ export class OrdersController {
   })
   @ApiResponse({ status: 404, description: "Not found order" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
-  public async confirmReturnedOrderProductById(
-    @Request() req,
-    @Param("id") id: string,
-  ): Promise<OrderDto> {
-    const result = await this.ordersService.updateOrderStatusById(id, OrderStatus.Returned);
-    return plainToClass(OrderDto, result);
+  public async confirmReturnedOrderProductById(@Request() req, @Param("id") id: string) {
+    await this.ordersService.confirmReturnedOrderById(id);
+    return { status: "OK" };
   }
 }

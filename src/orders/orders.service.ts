@@ -20,6 +20,9 @@ import { OrderDetailsRepository } from "../order-details/order-details.repositor
 import { UpdateOrderDto } from "./dtos/update-order.dto";
 import { OrderDetail } from "../order-details/schemas/order-detail.schema";
 import { OrderPopulate } from "./enums/order-populate";
+import { IncomesService } from "../incomes/incomes.service";
+import { IncomeMonthlyService } from "../income-monthly/income-monthly.service";
+import { BalancesService } from "../balances/balances.service";
 
 @Injectable()
 export class OrdersService {
@@ -36,6 +39,9 @@ export class OrdersService {
     private productsRepository: ProductsRepository,
     private addressesRepository: AddressesRepository,
     private orderDetailsRepository: OrderDetailsRepository,
+    private incomesService: IncomesService,
+    private incomeMonthlyService: IncomeMonthlyService,
+    private balancesService: BalancesService,
   ) {}
 
   // If startDate are same as endDate consider it is a full day
@@ -443,30 +449,71 @@ export class OrdersService {
     }
   }
 
-  public async cancelOrderById(id: any, user: User): Promise<Order> {
+  public async cancelOrderById(id: any, user: User): Promise<void> {
     const order = await this.findOrderDetailById(id);
 
     this.checkPermissionToCancelOrder(user, order);
 
-    return this.ordersRepository.findByIdAndUpdate(
-      id,
-      { status: OrderStatus.Cancelled },
-      { populate: this.orderPopulate },
-    );
+    await this.ordersRepository.updateOne({ _id: order._id }, { status: OrderStatus.Cancelled });
   }
 
-  public async updateOrderStatusById(id: any, status: string): Promise<Order> {
+  public async updateOrderStatusById(id: any, status: string): Promise<void> {
     const order = await this.findOrderDetailById(id);
+
     if (
-      (status === OrderStatus.Delivering && order.status !== OrderStatus.AwaitingPickup) ||
       (status === OrderStatus.Delivered && order.status !== OrderStatus.Delivering) ||
       (status === OrderStatus.AwaitingReturnPickup && order.status !== OrderStatus.Delivered) ||
-      (status === OrderStatus.Returning && order.status !== OrderStatus.AwaitingReturnPickup) ||
-      (status === OrderStatus.Returned && order.status !== OrderStatus.Returning)
+      (status === OrderStatus.Returning && order.status !== OrderStatus.AwaitingReturnPickup)
     ) {
       throw new ForbiddenException(`Order status is not valid`);
     }
-    const populate = this.orderPopulate;
-    return this.ordersRepository.findByIdAndUpdate(id, { status }, { populate });
+
+    return this.ordersRepository.updateOne({ _id: order._id }, { status });
+  }
+
+  public async deliveryOrderById(id: any): Promise<void> {
+    const order = await this.ordersRepository.findByIdOrThrowException(id);
+
+    if (order.status !== OrderStatus.AwaitingPickup) {
+      throw new ForbiddenException(`Order status must be ${OrderStatus.AwaitingPickup}`);
+    }
+
+    const [result, income] = await Promise.all([
+      this.ordersRepository.updateOne({ _id: order._id }, { status: OrderStatus.Delivering }),
+      this.incomesService.createIncomeFromOrderForLessor(order),
+    ]);
+
+    await Promise.all([
+      this.incomeMonthlyService.increaseUserIncomeMonthly(
+        order.lessor,
+        income.createdAt,
+        income.lessorEarned,
+      ),
+      this.balancesService.increaseUserBalance(income.lessorEarned, order.lessor),
+    ]);
+
+    return result;
+  }
+
+  public async confirmReturnedOrderById(id: any): Promise<void> {
+    const order = await this.ordersRepository.findByIdOrThrowException(id, null, {
+      populate: { path: "detail", populate: { path: "product" } },
+    });
+
+    if (order.status !== OrderStatus.Returning) {
+      throw new ForbiddenException(`Order status must be ${OrderStatus.Returning}`);
+    }
+
+    await Promise.all([
+      this.productsRepository.updateOne(
+        { _id: order.detail.product._id },
+        { $inc: { quantity: order.detail.quantity } },
+      ),
+      this.ordersRepository.findByIdAndUpdate(
+        id,
+        { status: OrderStatus.Returned },
+        { populate: this.orderPopulate },
+      ),
+    ]);
   }
 }

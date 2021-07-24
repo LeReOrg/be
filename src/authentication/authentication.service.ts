@@ -16,6 +16,7 @@ import { UtilsHelper } from "../common/helpers/utils.helper";
 import { ConfigService } from "@nestjs/config";
 import { MailNotificationService } from "../notification/mail-notification.service";
 import { RegisterAndLoginWithFirebaseRequestBodyDto } from "./dtos/register-login-firebase.request.dto";
+import { BalancesService } from "../balances/balances.service";
 
 @Injectable()
 export class AuthenticationService {
@@ -24,6 +25,7 @@ export class AuthenticationService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private mailNotificationService: MailNotificationService,
+    private balancesService: BalancesService,
   ) {}
 
   private generateSalt(): string {
@@ -48,13 +50,17 @@ export class AuthenticationService {
     const salt = this.generateSalt();
     const hash = this.hashPassword(input.password, salt);
 
-    return this.usersRepository.createOne({
+    const user = await this.usersRepository.createOne({
       email: input.email,
       displayName: input.displayName,
       phoneNumber: input.phoneNumber,
       salt,
       hash,
     });
+
+    await this.balancesService.openUserBalance(user);
+
+    return user;
   }
 
   private isMatchPassword(password: string, user: User): boolean {
@@ -183,6 +189,8 @@ export class AuthenticationService {
     if (!user) {
       throw new InternalServerErrorException("Upsert user failed", input.email);
     }
+
+    await this.balancesService.openUserBalance(user);
 
     const token = await this.login(user);
 
