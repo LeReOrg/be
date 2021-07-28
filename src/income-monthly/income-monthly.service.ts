@@ -32,8 +32,11 @@ export class IncomeMonthlyService {
   ) {
     const { startDate, endDate, user } = filters;
     const conditions: FilterQuery<IncomeMonthly> = { user };
-    if (startDate) conditions.timestamp = { $gte: startDate };
-    if (endDate) conditions.timestamp = { $lte: endDate };
+    if (startDate || endDate) {
+      const startDateCondition = startDate && { $gte: startDate };
+      const endDateCondition = endDate && { $lte: endDate };
+      conditions.timestamp = { ...startDateCondition, ...endDateCondition };
+    }
     options.sort = { ...options.sort, timestamp: "desc" };
     return this.incomeMonthlyRepository.paginate(conditions, options);
   }

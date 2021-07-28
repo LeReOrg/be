@@ -56,8 +56,11 @@ export class IncomesService {
   ) {
     const { startDate, endDate, user } = filters;
     const conditions: FilterQuery<Income> = { user };
-    if (startDate) conditions.createdAt = { $gte: startDate };
-    if (endDate) conditions.createdAt = { $lte: endDate };
+    if (startDate || endDate) {
+      const startDateCondition = startDate && { $gte: startDate };
+      const endDateCondition = endDate && { $lte: endDate };
+      conditions.createdAt = { ...startDateCondition, ...endDateCondition };
+    }
     options.sort = { ...options.sort, createdAt: "desc" };
     return this.incomesRepository.paginate(conditions, options);
   }
