@@ -70,22 +70,22 @@ export class UserAddressesController {
   }
 
   @Get("/:id")
-  @ApiOperation({ summary: "Find user address by id" })
+  @ApiOperation({ summary: "Find an active user address by id" })
   @ApiBearerAuth()
   @ApiResponse({ status: 200, type: AddressDto })
   @ApiResponse({ status: 404, description: "Not Found User Address" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
   @UseGuards(JwtAuthGuard)
-  public async findUserAddressById(
+  public async findActiveUserAddressById(
     @Request() req: any,
     @Param("id") id: string,
   ): Promise<AddressDto> {
-    const result = await this.addressesService.findUserAddressById(id, req.user);
+    const result = await this.addressesService.findActiveUserAddressById(id, req.user);
     return plainToClass(AddressDto, result);
   }
 
   @Patch("/:id")
-  @ApiOperation({ summary: "Update user address by id" })
+  @ApiOperation({ summary: "Update an active user address by id" })
   @ApiBearerAuth()
   @ApiResponse({ status: 200, type: AddressDto })
   @ApiResponse({ status: 400, description: "Invalid request message" })
@@ -102,7 +102,7 @@ export class UserAddressesController {
   }
 
   @Delete("/:id")
-  @ApiOperation({ summary: "Delete user address by id" })
+  @ApiOperation({ summary: "Delete an active user address by id" })
   @ApiBearerAuth()
   @ApiResponse({ status: 200, type: OkResponseBodyDto })
   @ApiResponse({ status: 403, description: "Could not delete default|pick up|shipping address" })

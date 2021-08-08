@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from "@nestjs/common";
+import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { AddressesRepository } from "./addresses.repository";
 import { Address } from "./schemas/address.schema";
 import { User } from "../users/schemas/user.schema";
@@ -106,8 +106,16 @@ export class AddressesService {
     return this.addressesRepository.paginate(conditions, options);
   }
 
-  public async findUserAddressById(id: any, user: User): Promise<Address> {
-    return this.addressesRepository.findUserAddressById(id, user);
+  public async findActiveUserAddressById(id: any, user: User): Promise<Address> {
+    const result = await this.addressesRepository.findOne({
+      _id: id,
+      user,
+      status: AddressStatus.Active,
+    });
+    if (!result) {
+      throw new NotFoundException("Not found user address");
+    }
+    return result;
   }
 
   public async updateUserAddressById(
@@ -115,7 +123,7 @@ export class AddressesService {
     input: UpdateUserAddressDto,
     user: User,
   ): Promise<Address> {
-    await this.findUserAddressById(id, user);
+    await this.findActiveUserAddressById(id, user);
     const update: Partial<Address> = {};
     if (input.fullName) update.fullName = input.fullName;
     if (input.phoneNumber) update.phoneNumber = input.phoneNumber;
@@ -132,7 +140,7 @@ export class AddressesService {
   }
 
   public async deleteUserAddressById(id: any, user: User): Promise<void> {
-    const address = await this.findUserAddressById(id, user);
+    const address = await this.findActiveUserAddressById(id, user);
     const { isDefaultAddress, isPickupAddress, isShippingAddress } = address;
     if (isDefaultAddress || isPickupAddress || isShippingAddress) {
       throw new ForbiddenException("Could not delete default | pick up | shipping address");

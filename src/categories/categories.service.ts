@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { CategoriesRepository } from "./categories.repository";
 import { CreateCategoryDto } from "./dtos/create-category.dto";
 import { Category } from "./schemas/category.schema";
@@ -8,6 +8,7 @@ import { PaginatedDocument } from "../common/interfaces/paginated-document";
 import { Product } from "../products/schemas/product.schema";
 import { FilterProductsDto } from "../products/dtos/filter-products.dto";
 import { ProductsService } from "../products/products.service";
+import { CategoryStatus } from "./enum/category-status";
 
 @Injectable()
 export class CategoriesService {
@@ -17,20 +18,17 @@ export class CategoriesService {
     private productsService: ProductsService,
   ) {}
 
-  public async fetchAll(): Promise<Category[]> {
-    return this.categoriesRepository.findAll();
-  }
-
   public async createCategory(input: CreateCategoryDto): Promise<Category> {
     const thumbnail = await this.cloudinaryService.uploadCategoryImage(input.thumbnail);
     return this.categoriesRepository.createOne({
       name: input.name,
       thumbnail,
+      status: CategoryStatus.Active,
     });
   }
 
   public async updateCategoryById(id: string, input: UpdateCategoryDto): Promise<Category> {
-    const category = await this.categoriesRepository.findByIdOrThrowException(id);
+    const category = await this.findActiveCategoryById(id);
 
     const update: Partial<Category> = {};
 
@@ -47,15 +45,11 @@ export class CategoriesService {
     return this.categoriesRepository.findByIdAndUpdate(id, update);
   }
 
-  public async findByIdOrThrowError(id: string): Promise<Category> {
-    return this.categoriesRepository.findByIdOrThrowException(id);
-  }
-
   public async filterProductsByCategoryId(
     id: string,
     input: FilterProductsDto,
   ): Promise<PaginatedDocument<Product>> {
-    const category = await this.findByIdOrThrowError(id);
+    const category = await this.findActiveCategoryById(id);
 
     return this.productsService.filterProducts(
       {
@@ -74,6 +68,35 @@ export class CategoriesService {
         sort: input.sort,
         populate: input.populate,
       },
+    );
+  }
+
+  public async filterCategories(): Promise<Category[]> {
+    return this.categoriesRepository.findAll({ status: CategoryStatus.Active });
+  }
+
+  public async findActiveCategoryById(id: any): Promise<Category> {
+    const category = await this.categoriesRepository.findOne({
+      _id: id,
+      status: CategoryStatus.Active,
+    });
+    if (!category) throw new NotFoundException("Not found category");
+    return category;
+  }
+
+  public async deleteCategoryById(id: any) {
+    const category = await this.findActiveCategoryById(id);
+    return this.categoriesRepository.updateOne(
+      { _id: category._id },
+      { status: CategoryStatus.Inactive },
+    );
+  }
+
+  // NOTE: This method is used to add "status" to existing categories which don't have
+  public async updateCategories(): Promise<void> {
+    await this.categoriesRepository.updateMany(
+      { status: { $exists: false } },
+      { status: CategoryStatus.Active },
     );
   }
 }
