@@ -51,6 +51,9 @@ export class Address {
 
   @Prop({ required: false, type: MongooseSchema.Types.ObjectId, ref: "Order" })
   order?: Order;
+
+  @Prop({ required: false })
+  status?: string;
 }
 
 export type AddressDocument = Address & Document;

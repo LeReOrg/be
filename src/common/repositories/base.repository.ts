@@ -114,4 +114,13 @@ export class BaseRepository<T extends Document> {
   public async createMany(docs: Partial<T>[], options?: InsertManyOptions) {
     return this.model.insertMany(docs, options);
   }
+
+  public async updateMany(
+    filter?: FilterQuery<T>,
+    update?: UpdateWithAggregationPipeline | UpdateQuery<T>,
+    options?: QueryOptions | null | undefined,
+  ): Promise<void> {
+    const raw = await this.model.updateMany(filter, update, options);
+    console.log(raw);
+  }
 }
