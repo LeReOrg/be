@@ -34,7 +34,7 @@ export class BaseRepository<T extends Document> {
   public async findOne(
     filter: FilterQuery<T>,
     projection?: any | null,
-    options?: QueryOptions | null,
+    options?: BaseQueryOptions | null,
   ): Promise<T | null> {
     return this.model.findOne(filter, projection, options);
   }

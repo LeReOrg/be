@@ -1,7 +1,4 @@
-import { DiscountDto } from "./discount.dto";
-import { UploadProductImageDto } from "./upload-product-image.dto";
 import {
-  ArrayMinSize,
   IsArray,
   IsBoolean,
   IsMongoId,
@@ -12,52 +9,61 @@ import {
   Min,
   ValidateNested,
 } from "class-validator";
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { ApiPropertyOptional } from "@nestjs/swagger";
 import { Transform, Type } from "class-transformer";
+import { DiscountDto } from "./discount.dto";
 import { BreadcrumbDto } from "./breadcrumb.dto";
-import { CreateProductAddressDto } from "../../addresses/dtos/create-product-address.dto";
+import { UpdateProductAddressDto } from "../../addresses/dtos/update-product-address.dto";
+import { UploadProductImageDto } from "./upload-product-image.dto";
 
-export class CreateProductDto {
+export class UpdateProductDto {
   @Type(() => String)
+  @IsOptional()
   @IsString()
   @IsMongoId()
-  @ApiProperty()
-  categoryId: string;
+  @ApiPropertyOptional()
+  categoryId?: string;
 
   @Type(() => String)
   @Transform((param) => param.value.trim())
+  @IsOptional()
   @IsString()
-  @ApiProperty()
-  name: string;
+  @ApiPropertyOptional()
+  name?: string;
 
   @Type(() => Number)
+  @IsOptional()
   @IsNumber()
   @Min(0)
-  @ApiProperty({ minimum: 0 })
-  price: number;
+  @ApiPropertyOptional({ minimum: 0 })
+  price?: number;
 
   @Type(() => Number)
+  @IsOptional()
   @IsNumber()
   @Min(0)
-  @ApiProperty({ minimum: 0 })
-  quantity: number;
+  @ApiPropertyOptional({ minimum: 0 })
+  quantity?: number;
 
   @Type(() => String)
+  @IsOptional()
   @IsString()
-  @ApiProperty()
-  description: string;
+  @ApiPropertyOptional()
+  description?: string;
 
   @Type(() => Number)
+  @IsOptional()
   @IsNumber()
   @Min(0)
-  @ApiProperty({ minimum: 0 })
-  depositPrice: number;
+  @ApiPropertyOptional({ minimum: 0 })
+  depositPrice?: number;
 
   @Type(() => Number)
+  @IsOptional()
   @IsNumber()
   @Min(0)
-  @ApiProperty({ minimum: 0 })
-  shortestHiredDays: number;
+  @ApiPropertyOptional({ minimum: 0 })
+  shortestHiredDays?: number;
 
   @Transform((params) =>
     params.value.map((value) => {
@@ -67,11 +73,14 @@ export class CreateProductDto {
       return value;
     }),
   )
+  @IsOptional()
   @ValidateNested({ each: true })
   @IsArray()
-  @ArrayMinSize(1)
-  @ApiProperty({ type: [UploadProductImageDto] })
-  images: UploadProductImageDto[];
+  @ApiPropertyOptional({
+    type: [UploadProductImageDto],
+    description: "NOTE: Only put NEW images into this field",
+  })
+  images?: UploadProductImageDto[];
 
   @Type(() => Boolean)
   @IsOptional()
@@ -105,14 +114,16 @@ export class CreateProductDto {
   breadcrumbs?: BreadcrumbDto[];
 
   @Type(() => DiscountDto)
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @ApiPropertyOptional({ type: [DiscountDto] })
   discounts?: DiscountDto[];
 
-  @Type(() => CreateProductAddressDto)
+  @Type(() => UpdateProductAddressDto)
+  @IsOptional()
   @ValidateNested()
   @IsObject()
-  @ApiProperty({ type: CreateProductAddressDto })
-  address: CreateProductAddressDto;
+  @ApiPropertyOptional({ type: UpdateProductAddressDto })
+  address?: UpdateProductAddressDto;
 }

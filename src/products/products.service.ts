@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  ForbiddenException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { ProductsRepository } from "./products.repository";
 import { CloudinaryService } from "../cloudinary/cloudinary.service";
 import { Product } from "./schemas/product.schema";
@@ -16,6 +22,9 @@ import { AddressesService } from "../addresses/addresses.service";
 import { AddressesRepository } from "../addresses/addresses.repository";
 import { FilterQuery } from "mongoose";
 import { Address } from "../addresses/schemas/address.schema";
+import { ProductStatus } from "./enums/product-status";
+import { UpdateProductDto } from "./dtos/update-product.dto";
+import { CategoriesService } from "../categories/categories.service";
 
 @Injectable()
 export class ProductsService {
@@ -25,6 +34,8 @@ export class ProductsService {
     private cloudinaryService: CloudinaryService,
     private addressesService: AddressesService,
     private addressesRepository: AddressesRepository,
+    @Inject(forwardRef(() => CategoriesService))
+    private categoriesService: CategoriesService,
   ) {}
 
   public async filterProducts(
@@ -46,7 +57,7 @@ export class ProductsService {
       populate?: string[];
     },
   ): Promise<PaginatedDocument<Product>> {
-    const conditions: FilterQuery<Product> = {};
+    const conditions: FilterQuery<Product> = { status: ProductStatus.Active };
 
     if (filters) {
       const {
@@ -112,9 +123,15 @@ export class ProductsService {
   }
 
   public async findProductDetailById(id: string): Promise<Product> {
-    return this.productsRepository.findByIdOrThrowException(id, undefined, {
-      populate: ["user", "category", "address"],
-    });
+    const product = await this.productsRepository.findOne(
+      { _id: id, status: ProductStatus.Active },
+      null,
+      { populate: ["user", "category", "address"] },
+    );
+    if (!product) {
+      throw new NotFoundException("Not Found Product");
+    }
+    return product;
   }
 
   private async uploadProductImages(
@@ -161,8 +178,8 @@ export class ProductsService {
     // No duplicated
     const categoryIds = [...setOfCategoryIds];
 
-    const categories = await this.categoriesRepository.findAll(
-      { _id: { $in: categoryIds } },
+    const categories = await this.categoriesService.filterCategories(
+      { ids: categoryIds },
       { _id: 1 },
     );
 
@@ -210,6 +227,7 @@ export class ProductsService {
       requiredLicenses: input.requiredLicenses,
       category,
       user,
+      status: ProductStatus.Active,
     };
 
     if (input.breadcrumbs) {
@@ -232,6 +250,129 @@ export class ProductsService {
       product.id,
       { images },
       { populate: ["user", "category", "address"] },
+    );
+  }
+
+  private async findAndCheckPermissionToModifyProduct(id: any, user: User): Promise<Product> {
+    const product = await this.findProductDetailById(id);
+    if (product.user.id != user.id) {
+      throw new ForbiddenException("Could not modify other user product");
+    }
+    return product;
+  }
+
+  private async validateUpdateProductInput(
+    id: any,
+    input: UpdateProductDto,
+    user: User,
+  ): Promise<{
+    product: Product;
+    categories: Category[];
+  }> {
+    const product = await this.findAndCheckPermissionToModifyProduct(id, user);
+
+    const setOfCategoryIds: Set<string> = new Set();
+
+    if (input.categoryId) {
+      setOfCategoryIds.add(input.categoryId);
+    }
+    input.breadcrumbs?.forEach((breadcrumb) => {
+      if (breadcrumb.categoryId) {
+        setOfCategoryIds.add(breadcrumb.categoryId);
+      }
+    });
+
+    // No duplicated
+    const categoryIds = [...setOfCategoryIds];
+
+    const categories = await this.categoriesService.filterCategories(
+      { ids: categoryIds },
+      { _id: 1 },
+    );
+
+    if (categoryIds.length !== categories.length) {
+      throw new NotFoundException("Not found category");
+    }
+
+    return { product, categories };
+  }
+
+  public async updateProductById(id: any, input: UpdateProductDto, user: User): Promise<Product> {
+    const { product, categories } = await this.validateUpdateProductInput(id, input, user);
+
+    const set: Partial<Product> = {};
+    const push: any = {};
+
+    if (input.categoryId) {
+      set.category = categories.find((category) => category.id === input.categoryId);
+    }
+    if (input.name) {
+      set.name = input.name;
+    }
+    if (input.price) {
+      set.price = input.price;
+    }
+    if (input.quantity) {
+      set.quantity = input.quantity;
+    }
+    if (input.description) {
+      set.description = input.description;
+    }
+    if (input.depositPrice) {
+      set.depositPrice = input.depositPrice;
+    }
+    if (input.shortestHiredDays) {
+      set.shortestHiredDays = input.shortestHiredDays;
+    }
+    if (typeof input.isTopProduct == "boolean") {
+      set.isTopProduct = input.isTopProduct;
+    }
+    if (input.label) {
+      set.label = input.label;
+    }
+    if (input.term) {
+      set.term = input.term;
+    }
+    if (input.requiredLicenses) {
+      set.requiredLicenses = input.requiredLicenses;
+    }
+    if (input.breadcrumbs) {
+      set.breadcrumbs = this.formatBreadcrumbsDtoToSchema(input.breadcrumbs, categories);
+    }
+    if (input.discounts) {
+      set.discounts = this.sortProductDiscounts(input.discounts);
+    }
+    if (input.address) {
+      set.address = await this.addressesService.updateAddressById(
+        product.address?._id,
+        input.address,
+      );
+    }
+    if (input.images) {
+      const newImages = await this.uploadProductImages(input.images, product.id);
+      push.images = { $each: newImages };
+    }
+
+    return this.productsRepository.findByIdAndUpdate(
+      product.id,
+      { $set: set, $push: push },
+      { populate: ["user", "category", "address"] },
+    );
+  }
+
+  public async deleteProductById(id: any, user: User): Promise<void> {
+    const product = await this.findAndCheckPermissionToModifyProduct(id, user);
+    return this.productsRepository.updateOne(
+      { _id: product._id },
+      { status: ProductStatus.Inactive },
+    );
+  }
+
+  // NOTE: This method is used to add "status" to existing products which don't have
+  public async updateProducts(): Promise<void> {
+    return this.productsRepository.updateMany(
+      { status: { $exists: false } },
+      { status: ProductStatus.Active },
     );
   }
 }

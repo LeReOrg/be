@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { forwardRef, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { CategoriesRepository } from "./categories.repository";
 import { CreateCategoryDto } from "./dtos/create-category.dto";
 import { Category } from "./schemas/category.schema";
@@ -9,12 +9,14 @@ import { Product } from "../products/schemas/product.schema";
 import { FilterProductsDto } from "../products/dtos/filter-products.dto";
 import { ProductsService } from "../products/products.service";
 import { CategoryStatus } from "./enum/category-status";
+import { FilterQuery } from "mongoose";
 
 @Injectable()
 export class CategoriesService {
   constructor(
     private categoriesRepository: CategoriesRepository,
     private cloudinaryService: CloudinaryService,
+    @Inject(forwardRef(() => ProductsService))
     private productsService: ProductsService,
   ) {}
 
@@ -71,8 +73,15 @@ export class CategoriesService {
     );
   }
 
-  public async filterCategories(): Promise<Category[]> {
-    return this.categoriesRepository.findAll({ status: CategoryStatus.Active });
+  public async filterCategories(
+    filter?: { ids?: any[]; status?: string },
+    projection?: any | null,
+  ): Promise<Category[]> {
+    const conditions: FilterQuery<Category> = { status: CategoryStatus.Active };
+    const { ids, status } = filter || {};
+    if (ids) conditions._id = { $in: ids };
+    if (status) conditions.status = status;
+    return this.categoriesRepository.findAll(conditions, projection);
   }
 
   public async findActiveCategoryById(id: any): Promise<Category> {

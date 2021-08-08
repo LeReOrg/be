@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Param, Post, Query, Request, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Request,
+  UseGuards,
+} from "@nestjs/common";
 import { ProductsService } from "./products.service";
 import { ApiBearerAuth, ApiExtraModels, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { ProductDto } from "./dtos/product.dto";
@@ -8,6 +19,7 @@ import { plainToClass, plainToClassFromExist } from "class-transformer";
 import { CreateProductDto } from "./dtos/create-product.dto";
 import { JwtAuthGuard } from "../authentication/guards/jwt.guard";
 import { FilterProductsDto } from "./dtos/filter-products.dto";
+import { OkResponseBodyDto } from "../common/dtos/ok.response.dto";
 
 @Controller("/products")
 @ApiTags("Products")
@@ -65,5 +77,47 @@ export class ProductsController {
   public async findProductDetailById(@Param("id") id: string): Promise<ProductDto> {
     const result = await this.productsService.findProductDetailById(id);
     return plainToClass(ProductDto, result);
+  }
+
+  @Patch("/:id")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Update a product by id" })
+  @ApiResponse({ status: 200, type: ProductDto })
+  @ApiResponse({ status: 400, description: "Invalid request message" })
+  @ApiResponse({ status: 403, description: "Could not modify other user product" })
+  @ApiResponse({ status: 404, description: "Not Found Product" })
+  @ApiResponse({ status: 500, description: "Unexpected error happen" })
+  public async updateProductById(
+    @Request() req,
+    @Param("id") id: string,
+    @Body() input: CreateProductDto,
+  ): Promise<ProductDto> {
+    const result = await this.productsService.updateProductById(id, input, req.user);
+    return plainToClass(ProductDto, result);
+  }
+
+  @Delete("/:id")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Delete a product by id" })
+  @ApiResponse({ status: 200, type: OkResponseBodyDto })
+  @ApiResponse({ status: 403, description: "Could not modify other user product" })
+  @ApiResponse({ status: 404, description: "Not Found Product" })
+  @ApiResponse({ status: 500, description: "Unexpected error happen" })
+  public async deleteProductById(
+    @Request() req,
+    @Param("id") id: string,
+  ): Promise<OkResponseBodyDto> {
+    await this.productsService.deleteProductById(id, req.user);
+    return { status: "OK" };
+  }
+
+  // NOTE: This method is used to add "status" to existing products which don't have
+  @Patch()
+  @UseGuards(JwtAuthGuard)
+  public async updateProducts(): Promise<OkResponseBodyDto> {
+    await this.productsService.updateProducts();
+    return { status: "OK" };
   }
 }
