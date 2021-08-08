@@ -105,6 +105,7 @@ export class UserAddressesController {
   @ApiOperation({ summary: "Delete user address by id" })
   @ApiBearerAuth()
   @ApiResponse({ status: 200, type: OkResponseBodyDto })
+  @ApiResponse({ status: 403, description: "Could not delete default|pick up|shipping address" })
   @ApiResponse({ status: 404, description: "Not Found User Address" })
   @ApiResponse({ status: 500, description: "Unexpected error happen" })
   @UseGuards(JwtAuthGuard)
