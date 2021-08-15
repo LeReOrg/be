@@ -42,7 +42,9 @@ export class OrdersService {
     private incomesService: IncomesService,
     private incomeMonthlyService: IncomeMonthlyService,
     private balancesService: BalancesService,
-  ) {}
+  ) {
+    this.runAutoUpdateOverHiredDateOrdersStatus();
+  }
 
   // If startDate are same as endDate consider it is a full day
   private calculateHiredDays(startDate: Date, endDate: Date): number {
@@ -515,5 +517,22 @@ export class OrdersService {
         { populate: this.orderPopulate },
       ),
     ]);
+  }
+
+  public async updateOverHiredDateOrdersStatus(): Promise<void> {
+    return this.ordersRepository.updateMany(
+      {
+        status: OrderStatus.Delivered,
+        endDate: { $lt: new Date() },
+      },
+      {
+        status: OrderStatus.AwaitingReturnPickup,
+      },
+    );
+  }
+
+  // Auto update every hour
+  public async runAutoUpdateOverHiredDateOrdersStatus(): Promise<void> {
+    setInterval(() => this.updateOverHiredDateOrdersStatus(), 3600000);
   }
 }
