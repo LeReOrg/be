@@ -133,9 +133,18 @@ export class AddressesService {
     if (input.ward) update.ward = input.ward;
     if (input.district) update.district = input.district;
     if (input.province) update.province = input.province;
-    if (input.isDefaultAddress) await this.changeUserDefaultAddress(user);
-    if (input.isPickupAddress) await this.changeUserPickupAddress(user);
-    if (input.isShippingAddress) await this.changeUserShippingAddress(user);
+    if (input.isDefaultAddress) {
+      await this.changeUserDefaultAddress(user);
+      update.isDefaultAddress = true;
+    }
+    if (input.isPickupAddress) {
+      await this.changeUserPickupAddress(user);
+      update.isPickupAddress = true;
+    }
+    if (input.isShippingAddress) {
+      await this.changeUserShippingAddress(user);
+      update.isShippingAddress = true;
+    }
     return this.addressesRepository.findByIdAndUpdate(id, update);
   }
 

@@ -48,6 +48,18 @@ export class AddressDto {
   province: string;
 
   @Expose()
+  @ApiProperty({ required: false })
+  isDefaultAddress?: boolean;
+
+  @Expose()
+  @ApiProperty({ required: false })
+  isPickupAddress?: boolean;
+
+  @Expose()
+  @ApiProperty({ required: false })
+  isShippingAddress?: boolean;
+
+  @Expose()
   @ApiProperty()
   createdAt: Date;
 
